@@ -1,4 +1,10 @@
-# Stranded on a "recommendation-island"
+---
+layout: post
+title: Stranded on a "recommendation-island"
+categories: tech
+author:
+- Dawood A Khan
+---
 When signing up for a Netflix account I was asked about the ‘shows that interest me’ --I presume to build my recommendation profile. However, since that day I have been stuck on a "recommendation-island" which is rife with the monotonicity based on my interest at the signup time. 
 
 Seasons change, our mood changes, our situations change, our circumstances changes. Human tastes can change/adapt over time. Then why should a recommendation engine get stuck on an island, based on the interests I selected at the start, and not adapt?
@@ -18,5 +24,5 @@ The idea of these update mechanisms is to identify and capture the implied inter
 
 PS: it is not just Netflix; Amazon Prime has the same problem, the engine assumes I like Bollywood movies and it is fair for me to browse through multiple pages to get to the actual content I want to watch. Just because there is some inferred feature in my profile -- that indicates to the recommendation engine that I like to watch Bollywood movie-- doesn't mean/indicate that I like to watch Bollywood movies.
 
-[Originally on linkedin link](https://www.linkedin.com/pulse/stranded-recommendation-island-dawood-khan/)
+[Originally on linkedin](https://www.linkedin.com/pulse/stranded-recommendation-island-dawood-khan/)
 #ML, #AI, #Netflix #Amazon #Prime
