@@ -1,9 +1,8 @@
 ---
 layout: page
-title: About
+title: About me.
 permalink: /about/
 ---
-# About me.
 
 I am a dedicated professional with 15+ years of experience with creating futuristic and innovative digital technologies which allow greater access to industrial automation, including automation systems, software tools and platforms, and control solutions. I have worked on platforms and technologies that drive the new generation of industrial solutions with a special focus AI/ML, NLP, embedded systems and Internet of Things.  I have readily applied the bleeding edge research results in an industrial environment, thereby offering innovative solutions to problems at hand.
 
