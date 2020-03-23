@@ -7,3 +7,4 @@
 #
 layout: home
 ---
+I work as a senior Assistant Professor in the Department of Computer Sciences--University of Kashmir _(Currently on a Sabatical)_. To know more about me [visit](/about.md)
