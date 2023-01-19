@@ -1,5 +1,10 @@
-# Mundanity of Excellence #
-
+---
+layout: post
+title:  Mundanity of Excellence
+categories: tech, programming, tdd, xp
+author:
+- Dawood A Khan
+---
 # “I'm not a great programmer; I'm just a good programmer with great habits.”  ― Kent Beck
 
  Daniel F. Chambliss in his paper "The Mundanity of Excellence: An Ethnographic Report on Stratification and Olympic Swimmers" 
