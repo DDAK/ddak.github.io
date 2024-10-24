@@ -10,7 +10,7 @@ const c2 = "#fffecb";
 export default function Home({ postsData }) {
   // Define these variables or import them from a config file
   const description = "The idea-factory; my journey through technology landscape and entrepreneurship.";
-  const home_page_url = "https://your-website-url.com/";
+  const home_page_url = "https://ddak.github.io/";
 
   return (
     <div>
@@ -60,7 +60,7 @@ export default function Home({ postsData }) {
         <link rel="canonical" href="https://ddak.github.io/" />
         <meta
           name="google-site-verification"
-          content="."
+          content="9Tboz1pyvOwN9CFYkwKvrbKhdGiHqvQ8pSb2Ii9a7Sg"
         />
 
         <title>Dawood Khan</title>
