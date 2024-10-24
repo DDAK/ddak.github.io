@@ -8,13 +8,6 @@ export default function App({ Component, pageProps }) {
     <>
       <Head>
       <meta name="google-adsense-account" content="ca-pub-1570360577499483"/>
-      <script async src="https://www.googletagmanager.com/gtag/js?id=G-QK255523820"></script>
-        <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments)}
-            gtag('js', new Date());
-            gtag('config', 'G-QK255523820);
-        </script>
         <link
           href="https://fonts.googleapis.com/css2?family=Maven+Pro&family=Share+Tech+Mono&family=Source+Sans+Pro&family=Ubuntu&display=swap"
           rel="stylesheet"

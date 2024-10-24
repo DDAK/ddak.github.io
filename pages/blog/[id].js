@@ -15,6 +15,16 @@ import NextOptimizedImage from "../../components/NextOptimizedImage.js";
 import CodeSyntaxHighlighter from "../../components/CodeSyntaxHighlighter.js";
 import Footer from "../../components/Footer.js";
 
+
+
+
+export async function generateMetadata({postMetadata}){
+  return {
+    title: postMetadata.title,
+    description: postMetadata.description
+  }
+}
+
 const c1 = "#071013",
   c2 = "#fffecb",
   c3 = "#20a4f3",
@@ -260,6 +270,7 @@ const components = {
 const home_page_url = "https://ddak.github.io/";
 
 export default function Blog({ postMetadata, postContent }) {
+
   return (
     <div style={{ minHeight: "100vh" }}>
       <Head>

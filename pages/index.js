@@ -16,14 +16,6 @@ export default function Home({ postsData }) {
     <div>
       <Head>
       <meta name="google-adsense-account" content="ca-pub-1570360577499483" />
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-347Y6PYYHE"></script>
-        <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments)}
-            gtag('js', new Date());
- 
-            gtag('config', 'G-347Y6PYYHE');
-        </script>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="description" content={description} />
