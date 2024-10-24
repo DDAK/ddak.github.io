@@ -7,7 +7,7 @@ export default function App({ Component, pageProps }) {
   return (
     <>
       <Head>
-      <meta name="google-adsense-account" content="ca-pub-1570360577499483">
+      <meta name="google-adsense-account" content="ca-pub-1570360577499483"/>
       <script async src="https://www.googletagmanager.com/gtag/js?id=G-QK255523820"></script>
         <script>
             window.dataLayer = window.dataLayer || [];
