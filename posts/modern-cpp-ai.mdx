@@ -1,0 +1,149 @@
+---
+title: "Modern C++ for ExaScale AI."
+description: "Building AI application using collection of C++ libraries and AI frameworks."
+imgName: "modern-cpp-for-ai/cpp-libraries.jpeg"
+date: "Jan 15, 2023"
+tags: ["AI", "ML", "C++"]
+keywords:
+  [
+    "AI",
+    "ML",
+    "C++",
+    "programming",
+  ]
+---
+
+!["Building AI application using collection of C++ libraries and AI frameworks"](modern-cpp-for-ai/cpp-libraries.jpeg)
+
+###### Published on: **Jan 15, 2023**
+
+## Outline:
+- [X] Introduction (This one)
+- [X] Package Managers (conan) and Build systems (cmake)
+- [X] C++ Computer vision demo projects: Haar and HOG (added to git repo and referenced here). 
+- [ ] Visual search & recommendation engine for ExaScale 
+
+## Introduction
+
+C++ is a powerful programming language that can be used for a wide range of applications, including AI. One of the reasons why it is well-suited for these tasks is that it offers a high level of control over the underlying hardware, which can be important for optimizing performance on edge devices and embedded systems. C++  language, on low-power edge devices,   allows for more efficient use of memory and other resources on devices with limited resources. Additionally, C++ has a rich set of libraries and frameworks that can be used for machine learning and other AI-related tasks, such as PyTorch, TensorFlow, Faiss, dlib,  OpenCV, and many more. 
+
+To complement the rapid development of AI systems we have a plethora of libraries available in the C++ ecosystem. Here is a list (not exhaustive) of some C++ libraries for AI development:
+
+1.  TensorFlow: [https://github.com/tensorflow/tensorflow](https://github.com/tensorflow/tensorflow)
+2.  PyTorch: [https://github.com/pytorch/pytorch](https://github.com/pytorch/pytorch)
+3.  dlib: [https://github.com/davisking/dlib](https://github.com/davisking/dlib)
+4.  Eigen: [https://github.com/eigenteam/eigen-git-mirror](https://github.com/eigenteam/eigen-git-mirror)
+5.  OpenCV: [https://github.com/opencv/opencv](https://github.com/opencv/opencv)
+6.  CatBoost: [https://github.com/catboost/catboost](https://github.com/catboost/catboost)
+7.  ArmNN: [https://github.com/Arm-software/ArmNN](https://github.com/Arm-software/ArmNN)
+8.  lightgbm: [https://github.com/microsoft/LightGBM](https://github.com/microsoft/LightGBM)
+9.  mlpack: [https://github.com/mlpack/mlpack](https://github.com/mlpack/mlpack)
+10.  Faiss: [https://github.com/facebookresearch/faiss](https://github.com/facebookresearch/faiss)
+11.  shogun: [https://github.com/shogun-toolbox/shogun](https://github.com/shogun-toolbox/shogun)
+12.  GRT (Gesture Recognition Toolkit): [https://github.com/nickgillian/grt](https://github.com/nickgillian/grt)
+13.  MXNet: [https://github.com/apache/incubator-mxnet](https://github.com/apache/incubator-mxnet)
+14.  Armadillo: [http://arma.sourceforge.net/](http://arma.sourceforge.net/)
+15.  MLPACK: [https://github.com/mlpack/mlpack](https://github.com/mlpack/mlpack)
+16.  XGboost: [https://github.com/dmlc/xgboost](https://github.com/dmlc/xgboost)
+17.  Shark: [https://github.com/Shark-ML/Shark](https://github.com/Shark-ML/Shark)
+18.  CNTK: [https://github.com/Microsoft/CNTK](https://github.com/Microsoft/CNTK)
+19. ONNX: [https://github.com/onnx/onnx](https://github.com/onnx/onnx)
+
+There are many other libraries and framworks, however, some of them are not in active development or have been merged/included with the popular frameworks mentioned above.
+
+For example, PyTorch (LibTorch) is written in C++, this is designed to address the use cases where the use of the Python is infeasible due to performance and portability requirements, such as in low latency, high performance or multithreaded environments, such as embedded systems, video games or production servers. With LibTorch, ML engineers can build and deploy their models in C++ environments, such as native mobile and embedded systems, or in multithreaded environments with strict latency requirements. 
+
+## Why C++ for AI on Edge Devices?
+C++ offers several advantages for AI development on edge devices:
+
+- Performance: C++ provides low-level control, allowing for optimized memory usage and efficient resource management.
+- Portability: C++ code can be compiled for various architectures, making it ideal for diverse edge devices.
+- Rich Ecosystem: A wide range of AI libraries and frameworks are available in C++.
+- Hardware Optimization: C++ allows direct hardware optimization, crucial for resource-constrained edge devices.
+
+## Project setup for a dummy project 
+
+I will use a simple structure for this application. Here is the output of the tree command to get the folder structure (pre-build stage)
+``` text
+|____APP
+	 |____application.cpp
+	 |____application.h
+	 |____CMakeLists.txt
+	 |____conanfile.txt
+```
+
+## Conan
+
+[Conan](https://conan.io/) is a package manager for C++. It is used to manage and distribute dependencies in your C++ projects. To install Conan, you need to have Python installed on your system (I am using python 3.9). Conan provides packages via [Conan center](https://conan.io/center/), which is a repository of prebuilt binaries for various machine architectures, that the Conan python client uses to download the required packages. 
+
+Here are the steps to install Conan on your system:
+
+1.  Install the Conan CLI: You can install Conan using pip, which is the Python package manager. To do this, open the terminal and run the **pip install conan** command.
+
+2.  Configure Conan: After installing Conan, you need to configure it to work with your system. You can do this by running **conan config install** command.
+
+3.  Add remote repository: By default, Conan doesn't have any remote repositories to search packages. You can add a remote repository to search packages. For example, you can add the Conan center repository, which is the default public repository for Conan packages, by running the **conan remote add conan-center https://center.conan.io ** command.
+
+   
+For more details about Conan check the [Jfrog's conan](https://academy.jfrog.com/path/conan) course and/or [Conan documentation](https://docs.conan.io/en/latest/).
+
+Setting *conanfile.txt*:
+
+To use Conan in your project, you need to create a *conanfile.txt* file in our project root directory. This file will contain information about your project's dependencies (open cv and dlib). Here's an example *conanfile.txt*:
+
+``` text
+[requires]
+opencv/4.5.5
+[generators]
+cmake
+```
+**Note**: I only have *opencv* as a dependency;  getting *dlib* to work with my *Mac M1 Pro* was problematic. I had to install dlib from source- check the instruction in *dlib* [repo](https://github.com/davisking/dlib). For other architecture types, you should be able to specify *dlib*  dependency in the *conanfile.txt*. Here is how I built and installed *dlib*.
+``` text
+git clone git@github.com:davisking/dlib.git
+cd dlib
+mkdir build && cd build
+cmake ..
+cmake --build .
+make install
+```
+
+## cmake
+
+setting *CMakeLists.txt*:
+
+To use the *cmake* build system in your project you need to create a *CMakeLists.txt* file in your project root directory. This file will contain information about your project's dependencies. Here's an example of *CMakeLists.txt*:
+
+``` text
+cmake_minimum_required(VERSION 2.8.12)
+project(APP)
+
+# C++ 20 standard
+add_compile_options(-std=c++20)
+
+
+if(NOT CMAKE_BUILD_TYPE)
+set(CMAKE_BUILD_TYPE Release)
+endif()
+
+set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
+find_package(dlib REQUIRED)  
+# Using the "cmake" generator
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup(TARGETS)
+
+add_executable(app application.cpp)
+
+target_link_libraries(app CONAN_PKG::opencv dlib::dlib)
+```
+
+Note: I use *find_package* in CMakeList to find and reference the *dlib* package I built in the previous step. This step is not needed if you were able to install *dlib* using the Conan package manager, and in that case, you may have to add *CONAN_PKG::dlib* reference in the *target_link_libraries*; if not already done so by Conan. This can be controlled in Conan, see [conan generators](https://docs.conan.io/en/latest/integrations/build_system/cmake/cmake_find_package_generator.html).
+
+In this writeup, I give a basic overview of how to install conan, use Conan, and use CMake build system. For more details, you can refer to CMake and Conan documentations. Moreover, there are many other package managers (vcpkg, hunter etc.) and build systems  (bazel, ninja etc.) for C++ development. I am just going over one particular combination of a package manager and a build system (albeit, a popular one) to set up some demo projects, [which I have put in my git repo](https://github.com/DDAK/AI_CPP). 
+
+
+## Conclusion
+We've set up a robust C++ development environment for building high-performance AI applications on edge devices. This foundation will allow us to leverage C++'s power and efficiency in creating optimized AI solutions.
+In the next posts, we'll dive into practical AI applications, demonstrating how to use this environment to build and optimize AI models for edge deployment.

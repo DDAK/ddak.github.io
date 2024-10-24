@@ -1,0 +1,42 @@
+.infoContainer {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .image {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    margin-bottom: 20px;
+  }
+  
+  .infoDescription {
+    font-size: 18px;
+    line-height: 1.6;
+    margin-bottom: 15px;
+  }
+  
+  .postTitle {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  
+  .postTitle:hover {
+    color: #0070f3;
+  }
+  
+  .postDescription {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 20px;
+  }
+  
+  .divider {
+    border: 0;
+    height: 1px;
+    background-color: #ddd;
+    margin: 30px 0;
+  }
