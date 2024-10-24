@@ -3,6 +3,7 @@ import { getPostsMetaData } from '../lib/getPostsData.js';
 import CardLayout from '../components/CardLayout.js';
 import Footer from '../components/Footer.js';
 import Header from '../components/Header.js';
+import moment from 'moment';
 
 const c4 = "#1d2b35";
 const c2 = "#fffecb";
@@ -94,6 +95,7 @@ export default function Home({ postsData }) {
 
 export function getStaticProps() {
   const postsData = getPostsMetaData();
+  postsData.sort((a, b) => moment(b.date).valueOf() - moment(a.date).valueOf());
   return {
     props: {
       postsData,
