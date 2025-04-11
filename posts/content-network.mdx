@@ -83,7 +83,7 @@ app.get('/:filename', async (req, res) => {
 exports.resizer=app;
 ```
 Critical caching headers ensure proper CDN behavior:  
-```javascript
+```txt
 res.set('Cache-Control', 'public, max-age=2629800'); // 1 month
 res.set('Content-Type', 'image/jpeg');
 res.set('Vary', 'Accept, Width, Height'); // Prevent parameter collisions
@@ -110,17 +110,17 @@ routeRules:
 
 | Request Type               | Example URL                            | Destination       |
 | -------------------------- | -------------------------------------- | ----------------- |
-| With width & height params | `/images/cat.jpg?width=300&height=200` | Cloud Run Resizer |
-| All other requests         | `/images/cat.jpg`                      | GCS Bucket        |
+| With width & height params | */images/cat.jpg?width=300&height=200* | Cloud Run Resizer |
+| All other requests         | */images/cat.jpg*                      | GCS Bucket        |
 
 
 ## Some other considerations
 1. The resizing service should handle errors, like invalid sizes or missing images. Also, using a CDN requires setting proper cache headers. The service should return `Cache-Control: public, max-age=...` so the CDN caches it. 
 2. **Security**: Ensure that the service can't be abused to generate too many sizes, possibly adding rate limiting or size restrictions. 
 3. **Cost**: Processing images on demand with Cloud Run/Cloud Functions incur costs based on the number of requests and processing time. Caching with CDN reduces the number of times the backend is hit and avoids saving different images sizes. 
-4. **Cache Invalidation**: Implement versioned URLs (`/v2/images/...`) to force CDN refresh when updating resizing logic.
+4. **Cache Invalidation**: Implement versioned URLs (*/v2/images/...*) to force CDN refresh when updating resizing logic.
 5. **Error Handling**: Custom error pages prevent CDN caching of error states:  
-   ```javascript
+   ```txt
    .on('error', (err) => {
      res.status(500).sendFile('error500.jpg');
    });
@@ -131,7 +131,7 @@ routeRules:
    - Backend Latency Percentiles
 7. **Alternative Image Protocols**, this example is limited to jpeg.  
    - WebP/AVIF format support  
-   - Density-aware `srcset` generation  
+   - Density-aware *srcset* generation  
 8. **Auto-Cropping/watermark-removal/blurring etc**, consider other applications using Cloud Vision API  
 
 ## Conclusion  
