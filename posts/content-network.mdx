@@ -49,7 +49,7 @@ General steps to follow for the implementation
 We chose Cloud Run over Cloud Functions for better control over containerization and longer request timeouts. The service uses Express.js and Sharp - a high-performance Node.js image processing library.  
 
 **Key features of the resizer:**  
-```javascript
+```txt
 const express = require('express'); 
 const sharp = require('sharp'); 
 const { Storage } = require('@google-cloud/storage'); 
@@ -91,7 +91,7 @@ res.set('Vary', 'Accept, Width, Height'); // Prevent parameter collisions
 
 ### 2. Intelligent Routing with Global Load Balancer  
 The GLB's URL Map routes requests based on query parameters:  
-```yaml 
+```txt 
 defaultService: projects/xyz/global/backendBuckets/cdn-fe 
 name: url-map-query-params 
 routeRules: 
