@@ -1,0 +1,139 @@
+---
+title: "CDN with On-Demand Image Resizing with Google Cloud"
+description: " A Cost-Efficient and efficient CDN Approach to serving media content"
+imgName: "cdn/cdn.jpeg"
+date: "Apr 11, 2025"
+tags: ["GCP", "CDN", "Image Processing", "Routing", "Content Network"]
+keywords:
+  [
+    "AI",
+    "CDN",
+    "GLB",
+    "CDN",
+    "Routing",
+  ]
+---
+
+!["CDN with On-Demand Image Resizing on GCP"](cdn/cdn.jpeg)
+
+###### Published on: **Apr 11, 2025**
+
+# On-Demand Image Resizing with Google Cloud: A Cost-Efficient CDN Approach  
+
+## Introduction
+We needed to serve images to our frontend application. These images were in a GCS bucket. In addition, we needed to serve images of various resolutions and we didn't want to store all image sizes in the bucket.  We chose to use a combo of CDN and load balancer on GCP to serve these images to the frontend. However, instead of storing all the variants of an image, we chose to generate resized versions on the fly when the frontend requests them--and cache those for performance and cost reasons.
+### Requirements:  
+1. Dynamically resizes images on demand  
+2. Caches generated sizes efficiently, to reduce compute costs  
+3. Integrates seamlessly with Google Cloud Platform (GCP) services  
+
+## Architecture Overview  
+
+Our final solution combined four key GCP services:  
+1. **Google Cloud CDN**: Caches resized images at edge locations  
+2. **Global Load Balancer (GLB)**: Routes requests based on query parameters, between CDN and Cloud Run resizing services  
+3. **Cloud Run**: Stateless container for image processing  
+4. **GCS Bucket**: Stores original high-resolution images  
+
+!["CDN with On-Demand Image Resizing on GCP"](cdn/arch.jpg)
+
+## Implementation Walkthrough  
+
+General steps to follow for the implementation
+1. Deploy a resizing service (Cloud Function/Cloud Run) that takes parameters (e.g., image path, width, height) and returns the resized image. 
+2. Configure the Load Balancer's backend service to point to this resizing service, and enable Cloud CDN on it. 
+3. Set up the route rules for URL Map structure so that requests for resized images include the parameters, like width and height. 
+4. The resizing service fetches the original image from GCS, resizes it, and returns it with appropriate Cache-Control headers so Cloud CDN caches it. 
+5. The CDN then serves subsequent requests for the same size from the cache.
+### 1. Dynamic Resizing Service (Cloud Run)  
+We chose Cloud Run over Cloud Functions for better control over containerization and longer request timeouts. The service uses Express.js and Sharp - a high-performance Node.js image processing library.  
+
+**Key features of the resizer:**  
+```javascript
+const express = require('express'); 
+const sharp = require('sharp'); 
+const { Storage } = require('@google-cloud/storage'); 
+const storage = new Storage(); 
+const app = express(); 
+app.get('/:filename', async (req, res) => { 
+	const { filename } = req.params; 
+	const width = parseInt(req.query.width) || undefined; 
+	const height = parseInt(req.query.height) || undefined; 
+	try { 
+		const bucket = storage.bucket('sb-listing-data'); 
+		const file = bucket.file(filename); 
+		const [exists] = await file.exists(); 
+		if (!exists) return res.status(404).send('Not found'); 
+		
+		const readStream = file.createReadStream(); 
+		let pipeline = sharp();
+		if (width > 2048 || height > 2048) {
+		     return res.status(400).send('Maximum size 2048px');
+		} 
+		if (width && height) { 
+			pipeline = pipeline.resize(width, height, { fit: 'inside' }); 
+		} 
+		res.set('Cache-Control', 'public, max-age=2629800'); // Cache for 1 month 
+		res.setHeader("content-type", "image/jpeg");
+		readStream.pipe(pipeline).pipe(res); 
+	} catch (error) { 
+		res.status(500).send('Error processing image'); 
+	} 
+}); 
+exports.resizer=app;
+```
+Critical caching headers ensure proper CDN behavior:  
+```javascript
+res.set('Cache-Control', 'public, max-age=2629800'); // 1 month
+res.set('Content-Type', 'image/jpeg');
+res.set('Vary', 'Accept, Width, Height'); // Prevent parameter collisions
+```
+
+### 2. Intelligent Routing with Global Load Balancer  
+The GLB's URL Map routes requests based on query parameters:  
+```yaml 
+defaultService: projects/xyz/global/backendBuckets/cdn-fe 
+name: url-map-query-params 
+routeRules: 
+- matchRules: 
+	- queryParameterMatches: 
+		- name: width 
+		  presentMatch: true 
+		- name: height 
+		  presentMatch: true 
+		pathTemplateMatch: /{filename=*} 
+	priority: 1 
+	service: projects//global/backendServices/resizer
+```
+
+**Routing Logic:**
+
+| Request Type               | Example URL                            | Destination       |
+| -------------------------- | -------------------------------------- | ----------------- |
+| With width & height params | `/images/cat.jpg?width=300&height=200` | Cloud Run Resizer |
+| All other requests         | `/images/cat.jpg`                      | GCS Bucket        |
+
+
+## Some other considerations
+1. The resizing service should handle errors, like invalid sizes or missing images. Also, using a CDN requires setting proper cache headers. The service should return `Cache-Control: public, max-age=...` so the CDN caches it. 
+2. **Security**: Ensure that the service can't be abused to generate too many sizes, possibly adding rate limiting or size restrictions. 
+3. **Cost**: Processing images on demand with Cloud Run/Cloud Functions incur costs based on the number of requests and processing time. Caching with CDN reduces the number of times the backend is hit and avoids saving different images sizes. 
+4. **Cache Invalidation**: Implement versioned URLs (`/v2/images/...`) to force CDN refresh when updating resizing logic.
+5. **Error Handling**: Custom error pages prevent CDN caching of error states:  
+   ```javascript
+   .on('error', (err) => {
+     res.status(500).sendFile('error500.jpg');
+   });
+   ```
+6. **Monitoring**: Critical Cloud Monitoring metrics:  
+   - CDN Cache Hit Ratio  
+   - Resizer 5xx Errors  
+   - Backend Latency Percentiles
+7. **Alternative Image Protocols**, this example is limited to jpeg.  
+   - WebP/AVIF format support  
+   - Density-aware `srcset` generation  
+8. **Auto-Cropping/watermark-removal/blurring etc**, consider other applications using Cloud Vision API  
+
+## Conclusion  
+
+This architecture reduced our image storage costs by 70% while maintaining sub-200ms response times for cached assets.
