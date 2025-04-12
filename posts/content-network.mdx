@@ -106,12 +106,13 @@ routeRules:
 	service: projects//global/backendServices/resizer
 ```
 
-##Routing Logic:
+**Routing Logic:**
 
 
-| Request Type               | Example URL                            | Destination       |
-| With width \& height params | `/images/cat.jpg?width=300&height=200` | Cloud Run Resizer |
-| All other requests         | `/images/cat.jpg`                      | GCS Bucket        |
+| Request Type                | Example URL                             | Destination         |
+|-----------------------------|-----------------------------------------|---------------------|
+| With width & height params  | `/images/cat.jpg?width=300&height=200`  | Cloud Run Resizer   |
+| All other requests          | `/images/cat.jpg`                       | GCS Bucket          |
 
 
 ## Some other considerations
