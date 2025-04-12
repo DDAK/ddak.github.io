@@ -106,12 +106,13 @@ routeRules:
 	service: projects//global/backendServices/resizer
 ```
 
-**Routing Logic:**
+##Routing Logic:
+
 
 | Request Type               | Example URL                            | Destination       |
-|---------------------------|----------------------------------------|-------------------|
 | With width \& height params | `/images/cat.jpg?width=300&height=200` | Cloud Run Resizer |
 | All other requests         | `/images/cat.jpg`                      | GCS Bucket        |
+
 
 ## Some other considerations
 1. The resizing service should handle errors, like invalid sizes or missing images. Also, using a CDN requires setting proper cache headers. The service should return *Cache-Control: public, max-age=...* so the CDN caches it. 
