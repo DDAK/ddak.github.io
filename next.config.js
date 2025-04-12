@@ -1,14 +1,17 @@
 // const withNextOptimizedImages = require('next-optimized-images');
 
-const withMDX = require('@next/mdx')({
+import withMDX from '@next/mdx'
+import remarkGfm from 'remark-gfm'
+
+const mdxConfig = withMDX({
   extension: /\.mdx?$/,
   options: {
-    remarkPlugins: [require('remark-gfm')],
+    remarkPlugins: [remarkGfm],
     rehypePlugins: [],
   },
 })
 
-module.exports =withMDX({
+const config = mdxConfig({
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.node = {
@@ -29,4 +32,6 @@ module.exports =withMDX({
     ],
   },
 })
+
+export default config
 
