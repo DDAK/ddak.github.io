@@ -2,6 +2,10 @@
 
 const withMDX = require('@next/mdx')({
   extension: /\.mdx?$/,
+  options: {
+    remarkPlugins: [require('remark-gfm')],
+    rehypePlugins: [],
+  },
 })
 
 module.exports =withMDX({
@@ -14,7 +18,7 @@ module.exports =withMDX({
     return config
   },
   output: "export", 
-  pageExtensions: ['js', 'jsx', 'mdx'],
+  pageExtensions: ['js', 'jsx', 'mdx','md','ts','tsx'],
   images: {
     unoptimized: true,
     localPatterns: [
