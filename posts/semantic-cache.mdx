@@ -1,0 +1,697 @@
+---
+title: "Semantic Cache: Supercharging Agentic AI with Distributed Semantic Search"
+description: "A deep dive into building a distributed semantic cache using Apache Arrow Flight, HNSW indexing, and consistent hashing - enabling AI agents to retrieve information by meaning, not just exact keys."
+imgName: "images/semantic-cache/semantic-cache.jpeg"
+date: "Jan 14, 2025"
+tags: ["AI", "Semantic Search", "Distributed Systems", "Agentic AI", "Apache Arrow", "Vector Database"]
+keywords:
+  [
+    "semantic cache",
+    "agentic AI",
+    "distributed systems",
+    "vector search",
+    "HNSW",
+    "Apache Arrow",
+    "Arrow Flight",
+    "consistent hashing",
+  ]
+---
+
+!["Semantic Cache Architecture"](images/semantic-cache/semantic-cache.jpeg)
+
+###### Published on: **Jan 14, 2025**
+
+## Semantic Cache: Supercharging Agentic AI with Distributed Semantic Search
+
+## I. Introduction
+
+Traditional caching systems require exact key matches to retrieve data. But what if you could find cached information by *meaning* instead? This is the core idea behind **Semantic Cache** - a distributed key-value store I built that combines the speed of traditional caching with the intelligence of semantic search.
+
+In the world of agentic AI, where autonomous agents need to reason, remember, and act without constant human guidance, semantic caching becomes a game-changer. Instead of agents repeating expensive computations or API calls for semantically similar queries, they can retrieve relevant past results instantly.
+
+## II. The Problem with Traditional Caching
+
+Traditional caching systems like Redis or Memcached are incredibly fast, but they have a fundamental limitation: **they only work with exact key matches**.
+
+Consider this scenario in an agentic AI system:
+
+```python
+# Agent caches a response
+cache.set("How to optimize database queries?", response_1)
+
+# Later, a semantically similar question comes in
+cache.get("database query optimization techniques")  # Returns None!
+```
+
+The second query is semantically identical to the first, but traditional caches miss this connection entirely. The agent must recompute or re-fetch the answer, wasting time and resources.
+
+**Semantic Cache solves this** by indexing data with vector embeddings and enabling similarity-based retrieval:
+
+```python
+# Store with semantic indexing
+semantic_kv.put("optimize-db-001", {
+    "query": "How to optimize database queries?",
+    "response": "Use indexing, query optimization, caching..."
+})
+
+# Search by meaning - finds the relevant cached response!
+results = semantic_kv.search("database query optimization techniques", top_k=3)
+```
+
+## III. Technology Stack
+
+### Apache Arrow: The Foundation
+
+**Apache Arrow** is a cross-language development platform for in-memory columnar data. The semantic cache uses Arrow in two critical ways:
+
+#### 1. Arrow IPC for Persistence
+
+The persistence layer uses Arrow's IPC (Inter-Process Communication) format to serialize KV entries to disk. The schema is defined as:
+
+```python
+KV_SCHEMA = pa.schema([
+    ('key', pa.string()),
+    ('value', pa.large_binary()),
+    ('embedding', pa.list_(pa.float32())),
+    ('created_at', pa.int64()),
+    ('ttl_ms', pa.int64()),
+    ('access_count', pa.int64()),
+    ('last_accessed', pa.int64()),
+])
+```
+
+This columnar format provides:
+- **Efficient compression**: Similar data types stored together compress better
+- **Fast partial reads**: Can read only specific columns without loading entire records
+- **Zero-copy deserialization**: Data can be memory-mapped directly without parsing
+- **Cross-language compatibility**: Arrow files can be read by Python, C++, Java, Rust, etc.
+
+#### 2. Arrow Flight for Network Communication
+
+**Arrow Flight** is a high-performance RPC framework built on gRPC and Arrow. Each node in the cluster is a Flight server that handles operations via the `do_action` protocol:
+
+```python
+class SemanticKVNode(flight.FlightServerBase):
+    def do_action(self, context, action):
+        action_type = action.type
+        body = action.body.to_pybytes()
+
+        if action_type == "put":
+            return self._action_put(body)
+        elif action_type == "get":
+            return self._action_get(body)
+        elif action_type == "search_local":
+            return self._action_search_local(body)
+        # ... other actions
+```
+
+Available Flight actions:
+| Action | Description |
+|--------|-------------|
+| `put` | Store key-value pair with embedding |
+| `put_replica` | Store replica (internal, from other nodes) |
+| `get` | Exact key lookup with TTL check |
+| `search_local` | Semantic search on local HNSW index |
+| `delete` | Remove key from store and index |
+| `scan` | List keys by prefix |
+| `stats` | Return node statistics |
+| `health` | Health check |
+| `clear` | Clear all data |
+
+**Why Arrow Flight over plain gRPC?**
+- **Native columnar data**: Perfect for batch operations and large result sets
+- **Zero-copy semantics**: Data moves directly from network buffer to application
+- **Built-in streaming**: Efficient for large result sets without loading all into memory
+- **Standard protocol**: Interoperable with Arrow ecosystem (Spark, Pandas, DuckDB)
+
+## IV. In-Memory Storage Architecture
+
+### Primary Storage: Python Dictionary
+
+The cache operates as an **in-memory first** system. Each node maintains data in a Python dictionary with `KVEntry` dataclass objects:
+
+```python
+@dataclass
+class KVEntry:
+    key: str
+    value: bytes
+    embedding: np.ndarray      # Vector embedding (384-3072 dims)
+    created_at: int            # Timestamp (milliseconds)
+    ttl_ms: int                # Time-to-live (0 = no expiration)
+    access_count: int = 0      # Access statistics
+    last_accessed: int = 0     # Last access timestamp
+
+# Storage structure
+self._store: Dict[str, KVEntry] = {}
+```
+
+### Thread Safety
+
+All operations are protected by a reentrant lock (`threading.RLock`):
+
+```python
+def _action_get(self, body: bytes):
+    key = body.decode()
+
+    with self._lock:  # Thread-safe access
+        if key not in self._store:
+            return [flight.Result(b"")]
+
+        entry = self._store[key]
+
+        # Check expiration
+        if self._is_expired(entry):
+            self._delete_entry(key)
+            return [flight.Result(b"")]
+
+        # Update access stats
+        entry.access_count += 1
+        entry.last_accessed = int(time.time() * 1000)
+
+        return [flight.Result(entry.value)]
+```
+
+### TTL Expiration
+
+Entries support time-to-live with lazy expiration checking:
+
+```python
+def _is_expired(self, entry: KVEntry) -> bool:
+    if entry.ttl_ms <= 0:
+        return False  # No expiration
+    now_ms = int(time.time() * 1000)
+    return (now_ms - entry.created_at) > entry.ttl_ms
+```
+
+## V. Persistence Layer
+
+While the primary storage is in-memory, the system provides durable persistence through the `ArrowKVStore` class:
+
+### Saving Data
+
+```python
+class ArrowKVStore:
+    def save(self, entries: Dict[str, KVEntry], index=None, metadata=None):
+        # Convert entries to Arrow table
+        keys, values, embeddings = [], [], []
+        for key, entry in entries.items():
+            keys.append(key)
+            values.append(entry.value)
+            embeddings.append(entry.embedding.tolist())
+
+        table = pa.Table.from_arrays([
+            pa.array(keys),
+            pa.array(values, type=pa.large_binary()),
+            pa.array(embeddings, type=pa.list_(pa.float32())),
+            # ... other columns
+        ], schema=KV_SCHEMA)
+
+        # Write to Arrow IPC file
+        with pa.OSFile(str(self._data_file), 'wb') as sink:
+            writer = ipc.new_file(sink, table.schema)
+            writer.write_table(table)
+            writer.close()
+```
+
+### Loading Data
+
+```python
+def load(self) -> Tuple[List[PersistedEntry], Dict]:
+    # Memory-map the Arrow file for zero-copy reads
+    with pa.memory_map(str(self._data_file), 'r') as source:
+        reader = ipc.open_file(source)
+        table = reader.read_all()
+
+    entries = []
+    for i in range(table.num_rows):
+        entry = PersistedEntry(
+            key=table['key'][i].as_py(),
+            value=table['value'][i].as_py(),
+            embedding=np.array(table['embedding'][i].as_py()),
+            # ... other fields
+        )
+        entries.append(entry)
+
+    return entries, metadata
+```
+
+### HNSW Index Persistence
+
+The HNSW index is persisted separately using hnswlib's native format:
+
+```python
+# Saving
+index.save_index(str(self._index_file))
+
+# Loading
+index = hnswlib.Index(space='cosine', dim=dim)
+index.load_index(str(self._index_file))
+```
+
+### Snapshot Manager
+
+For backup and recovery, the `SnapshotManager` provides:
+
+```python
+class SnapshotManager:
+    def create_snapshot(self, name: str = None):
+        # Copy all data files to snapshot directory
+        shutil.copytree(
+            self._data_dir,
+            snapshot_dir,
+            ignore=shutil.ignore_patterns('snapshots')
+        )
+
+    def restore_snapshot(self, name: str):
+        # Remove current data, copy snapshot back
+        ...
+```
+
+## VI. Cluster Formation and Topology
+
+### Static Node Configuration
+
+The cluster uses a **static configuration** model where nodes are known at startup:
+
+```python
+# Client connects to pre-configured nodes
+client = DistributedSemanticKV([
+    "grpc://node1:8815",
+    "grpc://node2:8816",
+    "grpc://node3:8817",
+    "grpc://node4:8818",
+])
+```
+
+Each node is an independent Flight server:
+
+```python
+# Start individual nodes
+node1 = SemanticKVNode(
+    location="grpc://0.0.0.0:8815",
+    node_id="node-1",
+    embedding_provider=SentenceTransformerEmbedding(),
+)
+node1.serve()  # Blocks, runs gRPC server
+```
+
+### Connection Pooling
+
+The client maintains a **lazy connection pool** with thread-safe initialization:
+
+```python
+def _get_client(self, node: str) -> flight.FlightClient:
+    with self._clients_lock:
+        if node not in self._clients:
+            self._clients[node] = flight.FlightClient(node)
+        return self._clients[node]
+```
+
+### Retry Logic with Backoff
+
+Failed operations are retried with exponential backoff:
+
+```python
+def _execute_with_retry(self, node, action_type, body, retries=2):
+    for attempt in range(retries + 1):
+        try:
+            client = self._get_client(node)
+            action = flight.Action(action_type, body)
+            results = list(client.do_action(action))
+            return results[0].body.to_pybytes()
+        except Exception:
+            # Remove stale connection, backoff, retry
+            del self._clients[node]
+            time.sleep(0.1 * (attempt + 1))
+```
+
+## VII. Query Distribution: Consistent Hashing
+
+### How Consistent Hashing Works
+
+The system uses **consistent hashing with virtual nodes** to distribute keys across the cluster. The implementation uses MD5 hashing:
+
+```python
+class ConsistentHashRing:
+    def __init__(self, nodes: List[str], virtual_nodes: int = 150):
+        self._virtual_nodes = virtual_nodes
+        self._ring: List[Tuple[int, str]] = []
+
+        for node in nodes:
+            self.add_node(node)
+
+    def _hash(self, key: str) -> int:
+        return int(hashlib.md5(key.encode()).hexdigest(), 16)
+
+    def add_node(self, node: str):
+        # Add virtual nodes for even distribution
+        for i in range(self._virtual_nodes):
+            virtual_key = f"{node}:vnode:{i}"
+            hash_val = self._hash(virtual_key)
+            self._ring.append((hash_val, node))
+
+        # Sort for binary search
+        self._ring.sort(key=lambda x: x[0])
+```
+
+### Virtual Nodes for Even Distribution
+
+With 150 virtual nodes per physical node:
+- **Even key distribution**: Keys spread uniformly across nodes
+- **Minimal reshuffling**: Adding/removing a node only remaps ~1/N keys
+- **O(log n) lookups**: Binary search on sorted ring
+
+```python
+def get_node(self, key: str) -> str:
+    hash_val = self._hash(key)
+
+    # Binary search for first node with hash >= key hash
+    idx = bisect_right(self._hash_values, hash_val)
+
+    # Wrap around if past the end
+    if idx >= len(self._ring):
+        idx = 0
+
+    return self._ring[idx][1]
+```
+
+### Operation Routing Patterns
+
+Different operations use different routing strategies:
+
+| Operation | Strategy | Description |
+|-----------|----------|-------------|
+| `put(key, value)` | **Deterministic** | Hash key -> single responsible node |
+| `get(key)` | **Deterministic** | Hash key -> single responsible node |
+| `delete(key)` | **Deterministic** | Hash key -> single responsible node |
+| `search(query)` | **Scatter-Gather** | Query ALL nodes -> merge by similarity |
+| `scan(prefix)` | **Scatter-Gather** | Query ALL nodes -> deduplicate keys |
+
+### PUT: Deterministic Write
+
+```python
+def put(self, key: str, value: bytes, ttl_ms: int = 0) -> bool:
+    # Hash determines the single responsible node
+    node = self._ring.get_node(key)
+
+    data = json.dumps({
+        'key': key,
+        'value': list(value),
+        'ttl_ms': ttl_ms
+    })
+
+    result = self._execute_with_retry(node, "put", data.encode())
+    return result == b"ok"
+```
+
+### GET: Deterministic Read
+
+```python
+def get(self, key: str) -> Optional[bytes]:
+    # Same hash -> same node as PUT
+    node = self._ring.get_node(key)
+
+    result = self._execute_with_retry(node, "get", key.encode())
+    return result if result else None
+```
+
+### SEARCH: Scatter-Gather
+
+Semantic search **must query all nodes** because similar items may be distributed anywhere:
+
+```python
+def search(self, query: str, top_k: int = 10, threshold: float = 0.7):
+    params = json.dumps({
+        'query': query,
+        'top_k': top_k,
+        'threshold': threshold
+    })
+
+    def search_node(node: str) -> List[dict]:
+        result = self._execute_with_retry(node, "search_local", params.encode())
+        return json.loads(result.decode()) if result else []
+
+    # SCATTER: Query all nodes in parallel
+    all_nodes = self._ring.get_all_nodes()
+    futures = {
+        self._executor.submit(search_node, node): node
+        for node in all_nodes
+    }
+
+    # GATHER: Collect results with timeout
+    all_results = []
+    for future in as_completed(futures, timeout=self._search_timeout):
+        node_results = future.result()
+        all_results.extend(node_results)
+
+    # MERGE: Sort by similarity, return top-k
+    all_results.sort(key=lambda x: x['similarity'], reverse=True)
+    return all_results[:top_k]
+```
+
+The thread pool uses `nodes * 2` workers by default for parallel operations:
+
+```python
+self._executor = ThreadPoolExecutor(max_workers=len(nodes) * 2)
+```
+
+## VIII. Vector Indexing with HNSW
+
+### HNSW Algorithm
+
+**HNSW (Hierarchical Navigable Small World)** is a state-of-the-art algorithm for approximate nearest neighbor search:
+
+```python
+self._index = create_vector_index(
+    dim=self._embedding_provider.dimension,  # 384-3072
+    max_elements=max_entries,                 # 100,000 default
+    ef_construction=200,                      # Build quality
+    M=16,                                     # Connections per node
+    ef_search=50                              # Search quality
+)
+```
+
+### Index Operations
+
+Each node maintains its own HNSW index with bidirectional mappings:
+
+```python
+# Mappings between keys and index positions
+self._key_to_idx: Dict[str, int] = {}
+self._idx_to_key: Dict[int, str] = {}
+self._next_idx = 0
+
+# Adding to index during PUT
+idx = self._next_idx
+self._index.add_items(embedding.reshape(1, -1), [idx])
+self._key_to_idx[key] = idx
+self._idx_to_key[idx] = key
+self._next_idx += 1
+```
+
+### Local Semantic Search
+
+```python
+def _action_search_local(self, body: bytes):
+    params = json.loads(body.decode())
+    query = params['query']
+    top_k = params.get('top_k', 10)
+    threshold = params.get('threshold', 0.7)
+
+    # Generate query embedding
+    query_embedding = self._get_embedding(query)
+
+    # Search HNSW index
+    k = min(top_k, self._index.get_current_count())
+    labels, distances = self._index.knn_query(
+        query_embedding.reshape(1, -1),
+        k=k
+    )
+
+    results = []
+    for label, dist in zip(labels[0], distances[0]):
+        # Cosine distance to similarity
+        similarity = 1.0 - dist
+
+        if similarity >= threshold:
+            key = self._idx_to_key[label]
+            entry = self._store[key]
+
+            results.append({
+                'key': key,
+                'value': entry.value.decode(),
+                'similarity': float(similarity),
+                'node': self.node_id
+            })
+
+    return [flight.Result(json.dumps(results).encode())]
+```
+
+## IX. Embedding Providers
+
+Three embedding backends are supported:
+
+### SentenceTransformers (Recommended)
+```python
+from sentence_transformers import SentenceTransformer
+
+class SentenceTransformerEmbedding:
+    def __init__(self, model_name="all-MiniLM-L6-v2"):
+        self.model = SentenceTransformer(model_name)
+        self.dimension = self.model.get_sentence_embedding_dimension()
+
+    def embed(self, text: str) -> np.ndarray:
+        return self.model.encode(text, convert_to_numpy=True)
+```
+
+### OpenAI Embeddings (Premium)
+```python
+import openai
+
+class OpenAIEmbedding:
+    def __init__(self, model="text-embedding-3-small"):
+        self.client = openai.OpenAI()
+        self.model = model
+
+    def embed(self, text: str) -> np.ndarray:
+        response = self.client.embeddings.create(
+            input=text,
+            model=self.model
+        )
+        return np.array(response.data[0].embedding)
+```
+
+## X. Performance Characteristics
+
+Benchmarked on a 4-node localhost cluster:
+
+| Operation | Throughput | Avg Latency | P99 Latency |
+|-----------|-----------|-------------|-------------|
+| GET (hit) | 7,195 ops/sec | 0.14 ms | 0.18 ms |
+| GET (miss) | 6,288 ops/sec | 0.16 ms | 0.62 ms |
+| PUT (100B) | 3,579 ops/sec | 0.28 ms | 0.43 ms |
+| PUT (1KB) | 2,721 ops/sec | 0.37 ms | 0.46 ms |
+| DELETE | 7,100 ops/sec | 0.14 ms | 0.20 ms |
+| SEARCH (1K keys) | 344 ops/sec | 2.91 ms | 3.37 ms |
+| SEARCH (10K keys) | 46 ops/sec | 21.59 ms | 30.48 ms |
+| SCAN | 1,396 ops/sec | 0.72 ms | 0.86 ms |
+
+## XI. Use Cases in Agentic AI
+
+### 1. Query Caching for Agent Memory
+
+```python
+# Store reasoning with semantic indexing
+kv.put_json("reasoning:001", {
+    "query": "How to handle authentication errors?",
+    "response": "Check token expiration, refresh if needed...",
+    "confidence": 0.95
+})
+
+# Later, find relevant past reasoning
+results = kv.search("authentication token expired", top_k=5)
+```
+
+### 2. Tool Discovery by Capability
+
+```python
+# Store tool metadata
+kv.put_json("tool:sql-executor", {
+    "name": "SQL Executor",
+    "description": "Executes parameterized SQL queries"
+})
+
+# Agent searches for relevant tools
+tools = kv.search("execute database queries", top_k=3)
+```
+
+### 3. Multi-Agent Knowledge Sharing
+
+```python
+# Agent A discovers rate limit
+agent_a.put_json("discovery:rate-limit", {
+    "endpoint": "/api/users",
+    "limit": "100 req/min"
+})
+
+# Agent B searches without knowing exact key
+results = agent_b.search("API rate limiting", top_k=1)
+```
+
+### 4. Conversation Context Retrieval
+
+```python
+# Store conversation turns
+kv.put_json("conv:turn:42", {
+    "user": "What files are in the project?",
+    "assistant": "[directory listing]"
+})
+
+# Retrieve relevant context
+context = kv.search("explore project structure", top_k=5)
+```
+
+## XII. Getting Started
+
+### Installation
+
+```bash
+pip install semantic-kv
+```
+
+### Start a Cluster
+
+```python
+from semantic_kv import SemanticKVNode, DistributedSemanticKV
+
+# Start nodes (in separate processes)
+node1 = SemanticKVNode(location="grpc://0.0.0.0:8815", node_id="node-1")
+node2 = SemanticKVNode(location="grpc://0.0.0.0:8816", node_id="node-2")
+
+# Connect client
+client = DistributedSemanticKV([
+    "grpc://localhost:8815",
+    "grpc://localhost:8816"
+])
+```
+
+### Basic Operations
+
+```python
+# Store data
+client.put("key1", b"value1")
+client.put_json("user:123", {"name": "Alice", "role": "admin"})
+
+# Exact retrieval
+value = client.get("key1")
+user = client.get_json("user:123")
+
+# Semantic search
+results = client.search("find admin users", top_k=5, threshold=0.7)
+for key, value, similarity, node in results:
+    print(f"Key: {key}, Score: {similarity:.2f}")
+```
+
+## XIII. Conclusion
+
+Semantic Cache bridges the gap between traditional caching systems and modern AI requirements. The key architectural decisions:
+
+- **Apache Arrow Flight** for high-performance RPC with zero-copy semantics
+- **Arrow IPC format** for efficient persistence and cross-language compatibility
+- **In-memory primary storage** with optional disk persistence
+- **Consistent hashing** for deterministic key routing with minimal reshuffling
+- **Scatter-gather pattern** for distributed semantic search
+- **HNSW indexing** for sub-millisecond vector similarity search
+
+This combination enables agentic AI systems to:
+- Find relevant past experiences by meaning
+- Avoid redundant computations
+- Share knowledge across agents naturally
+- Scale horizontally with demand
+
+---
+
+**Related Reading**:
+- [Apache Arrow Flight](https://arrow.apache.org/docs/format/Flight.html)
+- [Hierarchical Navigable Small World (HNSW)](https://arxiv.org/abs/1603.09320)
+- [Consistent Hashing](https://en.wikipedia.org/wiki/Consistent_hashing)
