@@ -1,216 +1,203 @@
 import Link from "next/link";
 import Image from "next/image";
 
-const c1 = "#071013",
-  c2 = "#fffecb",
-  c3 = "#20a4f3",
-  c4 = "#1d2b35",
-  c5 = "#fb232e";
-
-const card_container_hover_border = c5;
-const info_container_link = c4,
-  info_container_link_hover = c3,
-  info_container_link_active = c5,
-  date = c3,
-  description = c1 + "cc";
-const tag_link = c4,
-  tag_link_border = c5,
-  tag_link_hover = c2,
-  tag_link_hover_background = c3,
-  tag_link_hover_border = c2;
-const tag_link_active_background = c5;
-
 export default function CardLayout({ postsMetaData }) {
   return (
     <div className="card-layout">
       {postsMetaData.map((post) => {
         const metadata = post.metadata || post;
         const imgName = metadata.imgName || 'default-image.jpg';
-        // const imgType = imgName.split(".").pop();
-        
+
         return (
-          <div className="card-container" key={metadata.title || 'post'}>
-            <div>
+          <article className="card" key={metadata.title || 'post'}>
+            <Link href={`/blog/${metadata.id || '#'}`} className="card-link">
               <div className="img-container">
-              <Image
-              src={`/images/${imgName}`}
-              alt={metadata.title || 'Post image'}
-              width={450}
-              height={200}
-              loading="lazy"
-              /> 
+                <Image
+                  src={`/images/${imgName}`}
+                  alt={metadata.title || 'Post image'}
+                  width={450}
+                  height={225}
+                  loading="lazy"
+                  className="card-img"
+                />
+                <div className="img-overlay"></div>
               </div>
 
-              <div className="info-container">
-                <div className="description-container">
-                  <p className="date">{metadata.date || 'No date'}</p>
-                  <Link
-                    href={`/blog/${metadata.id || '#'}`}
-                    className="info-container-link"
-                  >
-                    {metadata.title || 'Untitled Post'}
-                  </Link>
-                  <p className="description">{metadata.description || 'No description available'}</p>
-                </div>
+              <div className="card-content">
+                <span className="date">{metadata.date || 'No date'}</span>
+                <h2 className="title">{metadata.title || 'Untitled Post'}</h2>
+                <p className="description">{metadata.description || 'No description available'}</p>
 
-                <div className="tags-container">
-                  <div className="tags-container-tag">
-                    {(metadata.tags || []).map((tag_name) => (
-                      <Link href={`/tags/${tag_name}`} key={tag_name} className="tag-link">
-                        {`#${tag_name}`}
-                      </Link>
-                    ))}
-                  </div>
+                <div className="tags">
+                  {(metadata.tags || []).slice(0, 3).map((tag_name) => (
+                    <span key={tag_name} className="tag">
+                      #{tag_name}
+                    </span>
+                  ))}
                 </div>
               </div>
-            </div>
-          </div>
+            </Link>
+          </article>
         );
       })}
 
       <style jsx>{`
         .card-layout {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-          margin: 1vh 11vw 1vh 11vw;
+          grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+          gap: 24px;
+          padding: 32px 5vw;
+          background: #0a0a0f;
+          min-height: calc(100vh - 200px);
         }
 
-        .card-container {
-          display: flex;
-          flex: 0 1 auto;
-          flex-direction: column;
-          flex-wrap: wrap;
-          box-sizing: border-box;
-          margin: 1vh 0.87vw 1vh 0.87vw;
-          border-bottom: 3px solid transparent;
+        .card {
+          background: linear-gradient(145deg, #12121a 0%, #15151f 100%);
+          border-radius: 12px;
+          overflow: hidden;
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          position: relative;
         }
 
-        .card-container:hover {
-          border-bottom: 3px solid ${card_container_hover_border};
-          transform: scale(0.99);
+        .card::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: 12px;
+          padding: 1px;
+          background: linear-gradient(135deg, rgba(0, 240, 255, 0) 0%, rgba(0, 240, 255, 0) 100%);
+          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          -webkit-mask-composite: xor;
+          mask-composite: exclude;
+          transition: all 0.3s ease;
+          pointer-events: none;
+        }
+
+        .card:hover {
+          transform: translateY(-4px);
+          border-color: rgba(0, 240, 255, 0.2);
+          box-shadow:
+            0 20px 40px rgba(0, 0, 0, 0.4),
+            0 0 40px rgba(0, 240, 255, 0.1);
+        }
+
+        .card:hover::before {
+          background: linear-gradient(135deg, rgba(0, 240, 255, 0.5) 0%, rgba(57, 255, 20, 0.5) 100%);
+        }
+
+        .card :global(.card-link) {
+          text-decoration: none;
+          display: block;
         }
 
         .img-container {
+          position: relative;
           width: 100%;
-          max-width: 100%;
+          aspect-ratio: 16/9;
+          overflow: hidden;
         }
 
-        img {
+        .img-container :global(.card-img) {
           width: 100%;
-          max-width: 100%;
-          aspect-ratio: 2/1;
+          height: 100%;
           object-fit: cover;
-          border-radius: 5px;
+          transition: transform 0.5s ease;
         }
 
-        .info-container {
-          display: flex;
-          flex: 100%;
-          max-width: 100%;
-          flex-direction: column;
-          flex-wrap: wrap;
-          overflow-wrap: break-word;
+        .card:hover .img-container :global(.card-img) {
+          transform: scale(1.05);
         }
 
-        .info-container-link {
-          font-family: "Maven Pro", sans-serif;
-          font-weight: bold;
-          font-size: calc(20px + (26 - 20) * ((100vw - 300px) / (1600 - 300)));
-          text-decoration: none;
-          overflow-wrap: break-word;
-          color: ${info_container_link};
+        .img-overlay {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(180deg, transparent 50%, rgba(10, 10, 15, 0.9) 100%);
+          pointer-events: none;
         }
 
-        .info-container-link:hover {
-          color: ${info_container_link_hover};
-        }
-
-        .info-container-link:active {
-          color: ${info_container_link_active};
+        .card-content {
+          padding: 20px 24px 24px;
         }
 
         .date {
-          font-family: "Source Sans Pro", sans-serif;
-          font-size: calc(15px + (18 - 15) * ((100vw - 300px) / (1600 - 300)));
-          font-weight: 600;
-          margin: 0.5vh 0 0.5vh 0;
-          color: ${date};
-          max-width: 100%;
+          font-family: 'Share Tech Mono', monospace;
+          font-size: 0.8rem;
+          color: #00f0ff;
+          text-transform: uppercase;
+          letter-spacing: 1px;
         }
 
-        .description-container {
-          display: flex;
-          flex-direction: column;
-          max-width: 100%;
+        .title {
+          font-family: 'Maven Pro', sans-serif;
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #e4e4e7;
+          margin: 8px 0 12px;
+          line-height: 1.4;
+          transition: color 0.3s ease;
+        }
+
+        .card:hover .title {
+          color: #00f0ff;
         }
 
         .description {
-          font-family: "Source Sans Pro", sans-serif;
-          font-size: calc(15px + (18 - 15) * ((100vw - 300px) / (1600 - 300)));
-          color: ${description};
-          max-width: 100%;
+          font-family: 'Source Sans Pro', sans-serif;
+          font-size: 0.95rem;
+          color: #a1a1aa;
+          line-height: 1.6;
+          margin-bottom: 16px;
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
         }
 
-        .tags-container {
+        .tags {
           display: flex;
-          flex: 100%;
-          max-width: 100%;
-          flex-direction: column-reverse;
-          margin: 2vh 0 2vh 0;
-        }
-
-        .tags-container-tag {
-          display: flex;
-          flex-direction: row;
           flex-wrap: wrap;
+          gap: 8px;
         }
 
-        .tag-link {
-          font-family: "Share Tech Mono", monospace;
-          font-size: calc(14px + (16 - 14) * ((100vw - 300px) / (1600 - 300)));
-          color: ${tag_link};
-          text-decoration: none;
-          margin-right: 1em;
-          border-bottom: 1px dashed ${tag_link_border};
+        .tag {
+          font-family: 'Share Tech Mono', monospace;
+          font-size: 0.75rem;
+          color: #39ff14;
+          padding: 4px 10px;
+          background: rgba(57, 255, 20, 0.1);
+          border: 1px solid rgba(57, 255, 20, 0.2);
+          border-radius: 4px;
+          transition: all 0.3s ease;
         }
 
-        .tag-link:hover {
-          background: ${tag_link_hover_background};
-          color: ${tag_link_hover};
-          border-bottom: 1px dashed ${tag_link_hover_border};
+        .card:hover .tag {
+          background: rgba(57, 255, 20, 0.15);
+          border-color: rgba(57, 255, 20, 0.4);
         }
 
-        .tag-link:active {
-          background: ${tag_link_active_background};
-        }
-
-        @media screen and (max-width: 1800px) {
+        @media screen and (max-width: 1200px) {
           .card-layout {
-            grid-template-columns: repeat(3, 1fr);
-            margin: 1vh 7vw 1vh 7vw;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            padding: 24px 4vw;
           }
         }
 
-        @media screen and (max-width: 1280px) {
+        @media screen and (max-width: 720px) {
           .card-layout {
-            grid-template-columns: repeat(2, 1fr);
-            margin: 1vh 5vw 1vh 5vw;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            padding: 20px 4vw;
           }
 
-          .card-container {
-            margin: 1vh 1vw 1vh 1vw;
-          }
-        }
-
-        @media screen and (max-width: 560px) {
-          .card-layout {
-            grid-template-columns: repeat(1, 1fr);
-            margin: 1vh 5vw 1vh 5vw;
+          .card-content {
+            padding: 16px 20px 20px;
           }
 
-          .card-container {
-            margin: 1vh 0 1vh 0;
-            border-bottom: 3px solid ${card_container_hover_border};
+          .title {
+            font-size: 1.15rem;
           }
         }
       `}</style>

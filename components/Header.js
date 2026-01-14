@@ -3,27 +3,12 @@ import Link from "next/link";
 import Tags from "./Tags.js";
 import Image from "next/image";
 
-const c1 = "#071013",
-  c2 = "#fffecb",
-  c3 = "#20a4f3",
-  c4 = "#4f759a",
-  c5 = "#fb232e",
-  c6 = "#ffaa33";
-
-const header = c4,
-  header_left_link = c6,
-  header_left_link_hover = c3,
-  header_left_link_active = c5;
-const header_right_link = c6,
-  header_right_link_hover = c3,
-  header_right_link_active = c5;
-
 export default function Header({
   logoSrc = "/images/dawood.png",
   logoAlt = "Logo",
   name = "Dawood Khan",
-  aboutLinkText = "About Me",
-  homeLinkText = "Homepage",
+  aboutLinkText = "About",
+  homeLinkText = "Home",
   description = "The idea-factory; my journey through technology landscape and entrepreneurship."
 }) {
   const [showTags, setShowTags] = useState("none");
@@ -33,29 +18,31 @@ export default function Header({
     setShowTags(showTags === "none" ? "block" : "none");
   }
 
-
   return (
-    <div className="header">
+    <header className="header">
       <div className="header-container">
         <div className="header-left">
-          <Link href="/">
-          <Image
-        src={logoSrc}
-        alt={logoAlt}
-        loading="lazy"
-        width={50}
-        height={50}
-        />            
+          <Link href="/" className="logo-link">
+            <Image
+              src={logoSrc}
+              alt={logoAlt}
+              loading="lazy"
+              width={40}
+              height={40}
+              className="logo-img"
+            />
+            <span className="site-name">{name}</span>
           </Link>
-          <Link href="/">{name}</Link>
         </div>
 
-        <div className="header-right">
-            <Link href="/about">
-              {aboutLinkText}
-            </Link>
-          {/* <Link href="/">{homeLinkText}</Link>         */}
-        </div>
+        <nav className="header-right">
+          <Link href="/" className="nav-link">
+            {homeLinkText}
+          </Link>
+          <Link href="/about" className="nav-link">
+            {aboutLinkText}
+          </Link>
+        </nav>
       </div>
 
       <div className="header-description">
@@ -67,124 +54,124 @@ export default function Header({
       </div>
 
       <style jsx>{`
+        .header {
+          position: sticky;
+          top: 0;
+          z-index: 100;
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+        }
+
         .header-container {
           display: flex;
-          flex: 1;
-          flex-direction: row;
-          padding: 10px 5vw;
-          background: ${header};
+          align-items: center;
+          justify-content: space-between;
+          padding: 16px 5vw;
+          background: rgba(10, 10, 15, 0.9);
+          border-bottom: 1px solid rgba(0, 240, 255, 0.15);
         }
 
         .header-left {
           display: flex;
-          flex: 1;
           align-items: center;
-          font-size:19px;
-          color:#1717dd;
         }
 
-        .header-left a {
-          font-family: "Source Sans Pro", sans-serif;
-          text-decoration: none;
-          color: ${header_left_link};
-        }
-        
-        img {
+        .header-left :global(.logo-link) {
           display: flex;
-          width: calc(1.2rem + 1vw);
-          max-width: calc(1.2rem + 1vw);
-          height: auto;
-          margin: 0 5px;
+          align-items: center;
+          gap: 12px;
+          text-decoration: none;
         }
 
-        img:hover {
-          cursor: pointer;
+        .header-left :global(.logo-img) {
+          border-radius: 50%;
+          border: 2px solid #00f0ff;
+          box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+          transition: all 0.3s ease;
         }
 
-        .header-left a:hover {
-          color: ${header_left_link_hover};
+        .header-left :global(.logo-img:hover) {
+          box-shadow: 0 0 25px rgba(0, 240, 255, 0.6);
         }
 
-        .header-left a:active {
-          color: ${header_left_link_active};
+        .header-left :global(.site-name) {
+          font-family: 'Share Tech Mono', monospace;
+          font-size: 1.4rem;
+          font-weight: 600;
+          color: #e4e4e7;
+          letter-spacing: 0.5px;
+          transition: color 0.3s ease;
+        }
+
+        .header-left :global(.site-name:hover) {
+          color: #00f0ff;
         }
 
         .header-right {
           display: flex;
-          flex: 3;
-          flex-direction: row-reverse;
-          align-items: center;
-          color:#1414d0;
-          font-size:16px;
-          padding-left:29px;
-
-          margin-right: 25px; // Added margin for spacing
-          margin-left: 10px; // Added margin for spacing between links
-        }
-        .header .header-right a{
-        padding-left:35px;
+          gap: 8px;
         }
 
-        .header .header-right a {
-          padding: 0 1vw;
-          font-family: "Source Sans Pro", sans-serif;
+        .header-right :global(.nav-link) {
+          font-family: 'Share Tech Mono', monospace;
+          font-size: 0.95rem;
           text-decoration: none;
-          color: ${header_right_link};
-                  padding-left:35px;
-
+          color: #a1a1aa;
+          padding: 8px 16px;
+          border: 1px solid transparent;
+          border-radius: 4px;
+          transition: all 0.3s ease;
+          position: relative;
         }
 
-        .header .header-right a:hover {
-          color: ${header_right_link_hover};
-        padding-left:35px;
-
+        .header-right :global(.nav-link:hover) {
+          color: #00f0ff;
+          border-color: rgba(0, 240, 255, 0.3);
+          background: rgba(0, 240, 255, 0.05);
         }
 
-        .header .header-right a:active {
-          color: ${header_right_link_active};
-        padding-left:35px;
-
+        .header-right :global(.nav-link:active) {
+          color: #39ff14;
         }
 
         .header-description {
-          padding: 15px 5vw;
-          background-color: ${c2};
-          font-family: "Source Sans Pro", sans-serif;
-          color: ${c1};
-          text-align: center;
+          padding: 20px 5vw;
+          background: linear-gradient(135deg, rgba(18, 18, 26, 0.95) 0%, rgba(26, 26, 36, 0.95) 100%);
+          border-bottom: 1px solid rgba(0, 240, 255, 0.1);
         }
 
         .header-description p {
+          font-family: 'Source Sans Pro', sans-serif;
+          font-size: 1rem;
+          color: #a1a1aa;
+          text-align: center;
           margin: 0;
+          line-height: 1.6;
         }
 
-        @media screen and (max-width: 920px) {
+        @media screen and (max-width: 640px) {
           .header-container {
-            padding: 10px 2vw;
+            padding: 12px 4vw;
           }
 
-          #name {
+          .header-left :global(.site-name) {
             display: none;
           }
 
-          img {
-            display: flex;
+          .header-right :global(.nav-link) {
+            padding: 8px 12px;
+            font-size: 0.9rem;
           }
-        }
 
-        @media screen and (max-width: 480px) {
-          .header-container {
-            padding: 10px 2vw;
-            overflow-x: scroll;
+          .header-description {
+            padding: 16px 4vw;
           }
-        }
 
-        @media screen and (max-width: 300px) {
-          img {
-            display: none;
+          .header-description p {
+            font-size: 0.9rem;
           }
         }
       `}</style>
-    </div>
+    </header>
   );
 }

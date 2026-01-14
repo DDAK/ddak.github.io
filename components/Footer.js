@@ -1,167 +1,139 @@
-import { Component } from "react";
+import { SiGithub, SiLinkedin } from "react-icons/si";
 
-import { SiGithub, SiLinkedin} from "react-icons/si";
+function Icon({ icon_name, normal_color, hover_color, icon_size }) {
+  const IconComponent = icon_name === "github" ? SiGithub : SiLinkedin;
+  const brandColor = icon_name === "github" ? "#fff" : "#0e76a8";
 
-const c1 = "#071013",
-  c2 = "#fffecb",
-  c3 = "#20a4f3",
-  c4 = "#1d2b35",
-  c5 = "#fb232e",
-  c6 = "#ffaa33";
-
-const copy_right = c2;
-
-class Icon extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      github_current_color: this.props.normal_color,
-      linkedin_current_color: this.props.normal_color,
-    };
-    this.icon_font_size = this.props.icon_size;
-    this.normal_color = this.props.normal_color;
-    this.github_color = "#24292e";
-    this.linkedin_color = "#0e76a8";
-  }
-
-  render() {
-    return (
-      <div>
-        {this.props.icon_name == "github" ? (
-          <SiGithub
-            style={{
-              color: this.state.github_current_color,
-              fontSize: this.icon_font_size,
-            }}
-            onMouseEnter={() => {
-              this.setState(() => ({
-                github_current_color: this.github_color,
-              }));
-            }}
-            onMouseLeave={() => {
-              this.setState(() => ({
-                github_current_color: this.normal_color,
-              }));
-            }}
-          />
-        ) : this.props.icon_name == "linkedin" ? (
-          <SiLinkedin
-            style={{
-              color: this.state.linkedin_current_color,
-              fontSize: this.icon_font_size,
-            }}
-            onMouseEnter={() => {
-              this.setState(() => ({
-                linkedin_current_color: this.linkedin_color,
-              }));
-            }}
-            onMouseLeave={() => {
-              this.setState(() => ({
-                linkedin_current_color: this.normal_color,
-              }));
-            }}
-          />
-        ) : null}
-      </div>
-    );
-  }
+  return (
+    <div className="icon-wrapper">
+      <IconComponent
+        style={{
+          color: normal_color,
+          fontSize: icon_size,
+          transition: 'all 0.3s ease',
+        }}
+      />
+      <style jsx>{`
+        .icon-wrapper {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.3s ease;
+        }
+        .icon-wrapper:hover :global(svg) {
+          color: ${brandColor} !important;
+          filter: drop-shadow(0 0 8px ${brandColor});
+        }
+      `}</style>
+    </div>
+  );
 }
 
 export default function Footer(props) {
   return (
-    <div className="footer-container">
-      <div className="footer-container-links">
-        <div className="footer-links">
-          {props.github == true ? (
-            <div className="link-item">
-              <a
-                href="https://github.com/ddak"
-                className="link"
-                rel="noreferrer"
-                target=" _blank"
-              >
-                <Icon
-                  icon_name="github"
-                  normal_color={props.normal_color}
-                  icon_size={props.icon_size}
-                />
-              </a>
-            </div>
-          ) : null}
+    <footer className="footer">
+      <div className="footer-content">
+        <div className="social-links">
+          {props.github && (
+            <a
+              href="https://github.com/ddak"
+              className="social-link"
+              rel="noreferrer"
+              target="_blank"
+              aria-label="GitHub"
+            >
+              <Icon
+                icon_name="github"
+                normal_color={props.normal_color || "#a1a1aa"}
+                icon_size={props.icon_size || "24px"}
+              />
+            </a>
+          )}
 
-          {props.linkedin == true ? (
-            <div className="link-item">
-              <a
-                href="https://www.linkedin.com/in/dawood-khan-phd/"
-                className="link"
-                rel="noreferrer"
-                target="_blank"
-              >
-                <Icon
-                  icon_name="linkedin"
-                  normal_color={props.normal_color}
-                  icon_size={props.icon_size}
-                />
-              </a>
-            </div>
-          ) : null}
+          {props.linkedin && (
+            <a
+              href="https://www.linkedin.com/in/dawood-khan-phd/"
+              className="social-link"
+              rel="noreferrer"
+              target="_blank"
+              aria-label="LinkedIn"
+            >
+              <Icon
+                icon_name="linkedin"
+                normal_color={props.normal_color || "#a1a1aa"}
+                icon_size={props.icon_size || "24px"}
+              />
+            </a>
+          )}
         </div>
+
+        {props.need_copy_right && (
+          <p className="copyright">
+            <span className="terminal-prompt">$</span> Dawood Khan © {new Date().getFullYear()}
+          </p>
+        )}
       </div>
 
-      {props.need_copy_right == true ? (
-        <div className="copy-right-container">
-          <p className="copy-right-text">Dawood Khan &#169; 2024</p>
-        </div>
-      ) : null}
-
       <style jsx>{`
-		  .footer-container {
-				display: flex;
-				flex-direction: column;
-				background: ${props.bg_color};
-				padding: ${props.vertical_padding} ${props.horizontal_padding} ${props.vertical_padding} ${props.horizontal_padding};
-			  }
+        .footer {
+          background: linear-gradient(180deg, #0a0a0f 0%, #12121a 100%);
+          border-top: 1px solid rgba(0, 240, 255, 0.1);
+          padding: ${props.vertical_padding || "24px"} ${props.horizontal_padding || "5vw"};
+        }
 
-			 .footer-container-links {
-				display: flex;
-				flex-direction: row;
-				justify-content: center;
-			  }
+        .footer-content {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 16px;
+        }
 
-			  .footer-links {
-				display: flex;
-				justify-content: center;
-				align-items: center;
-			  }
+        .social-links {
+          display: flex;
+          gap: 20px;
+        }
 
-			  .link-item {
-				margin: 0 ${props.horizontal_margin} 0 ${props.horizontal_margin};
-			  }
+        .social-link {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 44px;
+          height: 44px;
+          border-radius: 8px;
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          transition: all 0.3s ease;
+        }
 
-			  .link {
-				text-decoration: none;
-				cursor: pointer:
-				background-color: yellow;
-			  }
+        .social-link:hover {
+          background: rgba(0, 240, 255, 0.1);
+          border-color: rgba(0, 240, 255, 0.3);
+          transform: translateY(-2px);
+        }
 
-			  .link:hover {
-				color: black;
-			  }
+        .copyright {
+          font-family: 'Share Tech Mono', monospace;
+          font-size: 0.85rem;
+          color: #71717a;
+          margin: 0;
+        }
 
-			  .copy-right-container {
-				display: flex;
-				flex-direction: row;
-				justify-content: center;
-				margin-top: 10px;
-			  }
+        .terminal-prompt {
+          color: #00f0ff;
+          margin-right: 8px;
+        }
 
-			  .copy-right-text {
-				font-family: 'Maven Pro', sans-serif;
-				font-size: calc(0.75rem + 0.1vw);
-				color: ${copy_right};
-			  }
+        @media screen and (max-width: 640px) {
+          .footer {
+            padding: 20px 4vw;
+          }
 
-		  `}</style>
-    </div>
+          .social-link {
+            width: 40px;
+            height: 40px;
+          }
+        }
+      `}</style>
+    </footer>
   );
 }

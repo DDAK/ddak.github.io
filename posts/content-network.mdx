@@ -48,8 +48,8 @@ General steps to follow for the implementation
 ### 1. Dynamic Resizing Service (Cloud Run)  
 We chose Cloud Run over Cloud Functions for better control over containerization and longer request timeouts. The service uses Express.js and Sharp - a high-performance Node.js image processing library.  
 
-**Key features of the resizer:**  
-```txt
+**Key features of the resizer:**
+```javascript
 const express = require('express'); 
 const sharp = require('sharp'); 
 const { Storage } = require('@google-cloud/storage'); 
@@ -82,16 +82,16 @@ app.get('/:filename', async (req, res) => {
 }); 
 exports.resizer=app;
 ```
-Critical caching headers ensure proper CDN behavior:  
-```txt
+Critical caching headers ensure proper CDN behavior:
+```javascript
 res.set('Cache-Control', 'public, max-age=2629800'); // 1 month
 res.set('Content-Type', 'image/jpeg');
 res.set('Vary', 'Accept, Width, Height'); // Prevent parameter collisions
 ```
 
 ### 2. Intelligent Routing with Global Load Balancer  
-The GLB's URL Map routes requests based on query parameters:  
-```txt 
+The GLB's URL Map routes requests based on query parameters:
+```yaml
 defaultService: projects/xyz/global/backendBuckets/cdn-fe 
 name: url-map-query-params 
 routeRules: 
@@ -120,8 +120,8 @@ All other requests         | `/images/cat.jpg`                      | GCS Bucket
 2. **Security**: Ensure that the service can't be abused to generate too many sizes, possibly adding rate limiting or size restrictions. 
 3. **Cost**: Processing images on demand with Cloud Run/Cloud Functions incur costs based on the number of requests and processing time. Caching with CDN reduces the number of times the backend is hit and avoids saving different images sizes. 
 4. **Cache Invalidation**: Implement versioned URLs (*/v2/images/...*) to force CDN refresh when updating resizing logic.
-5. **Error Handling**: Custom error pages prevent CDN caching of error states:  
-   ```txt
+5. **Error Handling**: Custom error pages prevent CDN caching of error states:
+   ```javascript
    .on('error', (err) => {
      res.status(500).sendFile('error500.jpg');
    });

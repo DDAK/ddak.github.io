@@ -1,20 +1,5 @@
 import Link from "next/link";
 
-const c1 = "#071013",
-  c2 = "#fffecb",
-  c3 = "#20a4f3",
-  c4 = "#1d2b35",
-  c5 = "#fb232e";
-
-const tags_background = c2,
-  tags_border = c1,
-  tag = c4,
-  tag_border = c5;
-const tag_hover = c2,
-  tag_hover_background = c3,
-  tag_hover_border = c2,
-  tag_active_background = c5;
-
 const tags = [
   "ai",
   "python",
@@ -31,40 +16,51 @@ const tags = [
 
 export default function Tags() {
   return (
-    <div className="tags">
-      {tags.map((tag) => (
-        <Link href={`/tags/${tag}`} key={tag} className="tag-link">
-          {`#${tag}`}
-        </Link>
-      ))}
+    <div className="tags-container">
+      <div className="tags">
+        {tags.map((tag) => (
+          <Link href={`/tags/${tag}`} key={tag} className="tag-link">
+            #{tag}
+          </Link>
+        ))}
+      </div>
 
       <style jsx>{`
+        .tags-container {
+          padding: 16px 5vw;
+          background: rgba(18, 18, 26, 0.95);
+          border-bottom: 1px solid rgba(0, 240, 255, 0.1);
+        }
+
         .tags {
           display: flex;
-          flex-direction: row;
           flex-wrap: wrap;
           justify-content: center;
-          padding: 1vw 5vw 1vw 5vw;
-          background-color: ${tags_background};
-          border-bottom: 5px solid ${tags_border};
+          gap: 10px;
         }
 
-        .tag-link {
-          font-family: "Share Tech Mono", monospace;
-          color: ${tag};
-          margin: 0 1em 0 1em;
+        .tags :global(.tag-link) {
+          font-family: 'Share Tech Mono', monospace;
+          font-size: 0.85rem;
+          color: #39ff14;
+          padding: 6px 12px;
           text-decoration: none;
-          border-bottom: 1px dashed ${tag_border};
+          background: rgba(57, 255, 20, 0.08);
+          border: 1px solid rgba(57, 255, 20, 0.2);
+          border-radius: 4px;
+          transition: all 0.3s ease;
         }
 
-        .tag-link:hover {
-          background: ${tag_hover_background};
-          color: ${tag_hover};
-          border-bottom: 1px dashed ${tag_hover_border};
+        .tags :global(.tag-link:hover) {
+          color: #00f0ff;
+          background: rgba(0, 240, 255, 0.1);
+          border-color: rgba(0, 240, 255, 0.3);
+          transform: translateY(-1px);
         }
 
-        .tag-link:active {
-          background: ${tag_active_background};
+        .tags :global(.tag-link:active) {
+          color: #ff00aa;
+          border-color: rgba(255, 0, 170, 0.3);
         }
       `}</style>
     </div>

@@ -21,534 +21,364 @@ import {
   SiNginx,
   SiDocker,
   SiKubernetes,
- 
 } from "react-icons/si";
 import { MdEmail, MdLocationOn } from "react-icons/md";
 
-const c1 = "#071013",
-  c3 = "#20a4f3",
-  c4 = "#1d2b35",
-  c5 = "#fb232e",
-  c6 = "#ffaa33";
-
-const about_heading = c3,
-  about_meta_info = c4,
-  about_meta_icon = c4,
-  display_img_border = c4;
-const about_info = c1 + "d9",
-  external_link = c1,
-  external_link_border = c5,
-  external_link_hover = c3;
-const horizontal_break = c1 + "80",
-  portfolio_section_heading = c3,
-  portfolio_section_heading_decoraion = c6;
-const organization_name = c5,
-  role_buffer_dot = c1,
-  role_name = c4,
-  role_duration = c1 + "bf";
-const tech_stack_group_heading = c5,
-  tech_stack_icon = c4,
-  tech_stack_name = c4;
-
-const styles = `
-  .about-contanier {
-    display: flex;
-    flex: 1;
-    flex-direction: row;
-    margin: 1vh 10vw 1vh 10vw;
-  }
-
-  .about-heading {
-    font-family: 'Ubuntu', sans-serif;
-    font-size: calc(1.5rem + 0.7vw);
-    color: ${about_heading};
-  }
-
-  .about-meta {
-    display: flex;
-    flex: 25%;
-    max-width: 25%;
-    flex-direction: column;
-    align-items: center;
-    padding: 1vh 2.5vw 1vh 2.5vw;
-  }
-
-  .about-meta-info {
-    font-family: 'Source Sans Pro', sans-serif;
-    font-size: calc(0.9rem + 0.1vw);
-    color: ${about_meta_info};
-  }
-
-  .about-meta-icon-container {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-  }
-
-  .about-meta-icon {
-    color: ${about_meta_icon};
-    font-size: 21px;
-    margin-right: 5px;
-  }
-
-  .display-img {
-    width: 100%;
-    max-width: 100%;
-    height: auto;
-    border-radius: 50%;
-    border: 0px solid ${display_img_border};
-  }
-
-  .about-info {
-    display: flex;
-    flex: 75%;
-    flex-direction: column;
-    padding-top: 1vh;
-    color: ${about_info};
-  }
-
-  .about-info-description {
-    font-family: 'Source Sans Pro', sans-serif;
-    font-size: calc(0.9rem + 0.3vw);
-    margin: 1vh 0 1vh 0;
-  }
-
-  .external-link {
-    text-decoration: none;
-    color: ${external_link};
-    cursor: pointer;
-    border-bottom: 1px dashed ${external_link_border};
-  }
-
-  .external-link:hover {
-    color: ${external_link_hover};
-  }
-
-  .horizontal-line-break {
-    margin: 2vh 15% 2vh 15%;
-    border: 2px solid ${horizontal_break};
-  }
-
-  #portfolio-line-break {
-    display: none;
-  }
-
-  .tools-container {
-    display: flex;
-    flex: 100%;
-    max-width: 100%;
-    flex-direction: row;
-    margin: 1vh 10vw 1vh 10vw;
-  }
-
-  .portfolio-section-container {
-    display: flex;
-    flex: 50%;
-    max-width: 50%;
-    flex-direction: column;
-  }
-
-  .portfolio-section-heading {
-    font-family: 'Ubuntu', sans-serif;
-    font-size: calc(1.2rem + 0.7vw);
-    color: ${portfolio_section_heading};
-    text-decoration: underline;
-    text-decoration-color: ${portfolio_section_heading_decoraion};
-    text-align: center;
-    padding-bottom: 1vh;
-  }
-
-  .organization-container {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .organization-info-container {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-
-  .organization-logo {
-    width: 10%;
-    height: auto;
-    max-width: 10%;
-    padding: 0 2% 0 2%;
-  }
-
-  .organization-name {
-    width: 90%;
-    padding: 0 1% 0 1%;
-    font-family: 'Maven Pro', sans-serif;
-    font-size: calc(1rem + 0.4vw);
-    font-weight: bold;
-    color: ${organization_name};
-  }
-
-  ,roles-container {
-    display: flex;
-    flex: 100%;
-    flex-direction: column;
-  }
-
-  .role-container {
-    display: flex;
-    flex: 100%;
-    flex-direction: row;
-    padding: 1% 1% 1% 1%;
-  }
-
-  .role-buffer {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 10%;
-    max-width: 10%;
-  }
-
-  .role-buffer-dot {
-    width: .5em;
-    height: .5em;
-    background-color: ${role_buffer_dot};
-    border-radius: 50%;
-  }
-
-  .role {
-    display: flex;
-    flex: 90%;
-    max-width: 90%;
-    flex-direction: column;
-    flex-wrap: wrap;
-  }
-
-  .role-name {
-    font-family: 'Source Sans Pro', sans-serif;
-    font-size: calc(0.8rem + 0.3vw);
-    font-weight: bold;
-    color: ${role_name};
-  }
-
-  .role-duration {
-    font-family: 'Ubuntu', sans-serif;
-    font-size: calc(0.7rem + 0.1vw);
-    font-weight: light;
-    color: ${role_duration};
-  }
-
-  .tech-stack-group-heading {
-    font-family: 'Maven Pro', sans-serif;
-    font-size: calc(1rem + 0.4vw);
-    font-weight: bold;
-    color: ${tech_stack_group_heading};
-  }
-
-  .tech-stack-group {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    padding: 0 2vw 0 2vw;
-  }
-
-  .tech-stack-division {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-left: 0.8vw;
-    padding-right: 0.8vw;
-    padding-top: 0.1vw;
-    padding-bottom: 0.1vw;
-  }
-
-  .tech-stack-icon {
-    color: ${tech_stack_icon};
-    width: calc(1rem + 1vw);
-    height: calc(1rem + 1vw);
-  }
-
-  .tech-stack-name {
-    font-family: 'Source Sans Pro', sans-serif;
-    font-size: calc(0.7rem + 0.1vw);
-    color: ${tech_stack_name};
-  }
-
-  @media screen and (max-width: 1200px) {
-    .about-contanier {
-      flex-direction: row;
-      margin: 1vh 2vw 1vh 2vw;
-    }
-
-    .about-meta {
-      flex: 50%;
-      max-width: 50%;
-    }
-
-    .display-img {
-      width: 75%;
-      max-width: 75%;
-    }
-
-    .portfolio-section-container {
-      flex: 50%;
-      max-width: 50%;
-    }
-
-    .organization-logo {
-      padding: 0;
-    }
-
-    .tools-container {
-      flex-direction: row;
-    }
-  }
-
-  @media screen and (max-width: 580px) {
-    .about-contanier {
-      flex-direction: column;
-      margin: 1vh 5vw 1vh 5vw;
-    }
-
-    .about-meta {
-      flex: 100%;
-      max-width: 100%;
-    }
-
-    .display-img {
-      width: 50%;
-      max-width: 50%;
-    }
-
-    .horizontal-line-break {
-      margin: 2vh 10% 2vh 10%;
-      border: 1px solid ${horizontal_break};
-    }
-
-    .portfolio-section-container {
-      flex: 100%;
-      max-width: 100%;
-    }
-
-    #portfolio-line-break {
-      display: flex;
-    }
-
-    .tools-container {
-      flex-direction: column;
-    }
-  }
-
-`;
-
 const home_page_url = "https://ddak.github.io/";
-const description =
-  "I'm Dawood Khan, CTO at Thndr, Dubai UAE.";
+const description = "I'm Dawood Khan, CTO at Thndr, Dubai UAE.";
+
+const skills = [
+  { icon: SiPython, name: "Python", color: "#3776ab" },
+  { icon: SiGo, name: "Go", color: "#00add8" },
+  { icon: SiCplusplus, name: "C++", color: "#00599c" },
+  { icon: SiRust, name: "Rust", color: "#ce422b" },
+  { icon: SiZig, name: "Zig", color: "#f7a41d" },
+  { icon: SiPostgresql, name: "PostgreSQL", color: "#336791" },
+  { icon: SiKeras, name: "Keras", color: "#d00000" },
+  { icon: SiPytorch, name: "PyTorch", color: "#ee4c2c" },
+  { icon: SiOpencv, name: "OpenCV", color: "#5c3ee8" },
+  { icon: SiMysql, name: "MySQL", color: "#4479a1" },
+  { icon: SiRedis, name: "Redis", color: "#dc382d" },
+  { icon: SiGit, name: "Git", color: "#f05032" },
+  { icon: SiNginx, name: "Nginx", color: "#009639" },
+  { icon: SiDocker, name: "Docker", color: "#2496ed" },
+  { icon: SiKubernetes, name: "Kubernetes", color: "#326ce5" },
+];
 
 export default function About_Page() {
   return (
-    <div>
+    <div className="about-page">
       <Head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="description" content={description} />
         <meta name="author" content="Dawood Khan" />
 
-        <meta
-          property="og:title"
-          content={"About - Dawood Khan"}
-          key="ogtitle"
-        />
+        <meta property="og:title" content="About - Dawood Khan" key="ogtitle" />
         <meta property="og:description" content={description} key="ogdesc" />
         <meta property="og:url" content={home_page_url + "about"} key="ogurl" />
-        <meta
-          property="og:image"
-          content={home_page_url + "images/dawood.png"}
-          key="ogimage"
-        />
+        <meta property="og:image" content={home_page_url + "images/dawood.png"} key="ogimage" />
         <meta property="og:type" content="article" />
-        <meta
-          property="og:article:publisher"
-          content={home_page_url}
-          key="ogaritclepublisher"
-        />
-        <meta
-          property="og:site_name"
-          content={"Dawood Khan"}
-          key="ogsitename"
-        />
+        <meta property="og:article:publisher" content={home_page_url} key="ogaritclepublisher" />
+        <meta property="og:site_name" content="Dawood Khan" key="ogsitename" />
 
         <meta name="twitter:card" content="summary" />
-        <meta
-          name="twitter:title"
-          content={"About - Dawood Khan"}
-        />
+        <meta name="twitter:title" content="About - Dawood Khan" />
         <meta name="twitter:description" content={description} />
         <meta name="twitter:url" content={home_page_url + "about"} />
         <meta name="twitter:site" content="@ddak_1980" />
-        <meta
-          name="twitter:image"
-          content={home_page_url + "images/dawood.png"}
-        />
+        <meta name="twitter:image" content={home_page_url + "images/dawood.png"} />
         <meta name="twitter:creator" content="@ddak_1980" />
 
         <link rel="icon" href="/images/dawood.png?" />
-        <link
-          rel="canonical"
-          href="https://ddak.github.io/about"
-        />
+        <link rel="canonical" href="https://ddak.github.io/about" />
 
-        <title>{"About - Dawood Khan"}</title>
-
-        <style type="text/css">{styles}</style>
+        <title>About - Dawood Khan</title>
       </Head>
 
-      <div>
-        <Header />
+      <Header />
 
-        <div className="about-contanier">
-          <div className="about-meta">
-          <Image
-              className="display-img"
+      <main className="about-main">
+        <section className="profile-section">
+          <div className="profile-image-container">
+            <Image
+              className="profile-image"
               src="/images/about/dawood.jpg"
               alt="Dawood Khan"
-              loading="lazy"
-              width={100}
-              height={100}
-            /> 
-            <Footer
-              bg_color={"transparent"}
-              normal_color={c4}
-              icon_size={"21px"}
-              horizontal_margin={"5px"}
-              horizontal_padding={"1px"}
-              vertical_padding={"5px"}
-              github={true}
-              linkedin={true}
-              medium={true}
-              kaggle={false}
-              need_copy_right={false}
+              width={200}
+              height={200}
+              priority
             />
-            <div className="about-meta-icon-container">
-              <MdEmail className="about-meta-icon" />
-              <p className="about-meta-info">dawood.khan@gmail.com</p>
-            </div>
-            <div className="about-meta-icon-container">
-              <MdLocationOn className="about-meta-icon" />
-              <p className="about-meta-info">Dubai, United Arab Emirates</p>
-            </div>
+            <div className="image-glow"></div>
           </div>
-          <div className="about-info">
-            <p className="about-info-description">
-              Hello, I&apos;m <b>Dawood Khan</b>, CTO/Principal Engineer at Thndr, Dubai UAE
-            </p>
 
-            <p className="about-info-description">
-            I am a seasoned professional with 20 years of experience delivering cutting-edge solutions in e-commerce, mobility, and industrial automation. My expertise spans AI, distributed systems (cloud-based and embedded), IoT, and automation tools. I excel at applying research to real-world challenges and leading cross-functional teams with an entrepreneurial, collaborative approach.
+          <div className="profile-info">
+            <h1 className="profile-name">Dawood Khan</h1>
+            <p className="profile-title">CTO / Principal Engineer at Thndr</p>
 
-With a strong focus on AI, cloud, and IoT, I combine hands-on software development and leadership to drive impactful results. Skilled in both technical and project management, I use agile methodologies to align teams with long-term goals. Outside of work, I enjoy traveling, photography, and reading.  
-As an academic, I have, so far, supervised two PhD theses:
-</p>
-<ol>
-  <li>
-    <Link href="https://www.linkedin.com/in/owais-bhat-29140814b/" legacyBehavior>
-      <a target="_blank" rel="noopener noreferrer">Owais Bhat</a>
-    </Link> who worked on &quot;Context-aware Deep Learning system for glycemic control in diabetic patients&quot;
-  </li>
-  <li>
-    <Link href="https://www.linkedin.com/in/zubair-khaliq-924836133/" legacyBehavior>
-      <a target="_blank" rel="noopener noreferrer">Zubair Khaliq</a>
-    </Link> who worked on &quot;Development of Deep Learning based Intelligent Automation Framework for User Interface Testing&quot;
-  </li>
-</ol>
-<p className="about-info-description">
-In addition to these, I have supervised numerious masters and undergraduate theses and senior year projects, respectively. 
-</p>
-          </div>
-        </div>
-
-        <div className="horizontal-line-break"></div>
-
-        <div className="tools-container">
-          <div className="portfolio-section-container">
-            <p className="tech-stack-group-heading">Tools & Skills</p>
-            <div className="tech-stack-group">
-              <div className="tech-stack-division">
-                <SiPython className="tech-stack-icon" />
-                <p className="tech-stack-name">Python</p>
+            <div className="contact-info">
+              <div className="contact-item">
+                <MdEmail className="contact-icon" />
+                <span>dawood.khan@gmail.com</span>
               </div>
-
-              <div className="tech-stack-division">
-                <SiGo className="tech-stack-icon" />
-                <p className="tech-stack-name">Go</p>
-              </div>
-
-              <div className="tech-stack-division">
-                <SiCplusplus className="tech-stack-icon" />
-                <p className="tech-stack-name">CPP</p>
-              </div>
-
-              <div className="tech-stack-division">
-                <SiRust className="tech-stack-icon" />
-                <p className="tech-stack-name">Rust</p>
-              </div>
-
-              <div className="tech-stack-division">
-                <SiZig className="tech-stack-icon" />
-                <p className="tech-stack-name">Zig</p>
-              </div>
-
-              <div className="tech-stack-division">
-                <SiPostgresql className="tech-stack-icon" />
-                <p className="tech-stack-name">Postgres</p>
-              </div>
-
-              <div className="tech-stack-division">
-                <SiKeras className="tech-stack-icon" />
-                <p className="tech-stack-name">Keras</p>
-              </div>
-              <div className="tech-stack-division">
-                <SiPytorch className="tech-stack-icon" />
-                <p className="tech-stack-name">Pytorch</p>
-              </div>
-
-              <div className="tech-stack-division">
-                <SiOpencv className="tech-stack-icon" />
-                <p className="tech-stack-name">OpenCV</p>
-              </div>
-
-              <div className="tech-stack-division">
-                <SiMysql className="tech-stack-icon" />
-                <p className="tech-stack-name">MySQL</p>
-              </div>
-
-              <div className="tech-stack-division">
-                <SiRedis className="tech-stack-icon" />
-                <p className="tech-stack-name">Redis</p>
-              </div>
-
-              <div className="tech-stack-division">
-                <SiGit className="tech-stack-icon" />
-                <p className="tech-stack-name">Git</p>
-              </div>
-
-              <div className="tech-stack-division">
-                <SiNginx className="tech-stack-icon" />
-                <p className="tech-stack-name">Nginx</p>
-              </div>
-
-              <div className="tech-stack-division">
-                <SiDocker className="tech-stack-icon" />
-                <p className="tech-stack-name">Docker</p>
-              </div>
-
-              <div className="tech-stack-division">
-                <SiKubernetes className="tech-stack-icon" />
-                <p className="tech-stack-name">Kubernetes</p>
+              <div className="contact-item">
+                <MdLocationOn className="contact-icon" />
+                <span>Dubai, United Arab Emirates</span>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </section>
+
+        <section className="bio-section">
+          <h2 className="section-title">About Me</h2>
+
+          <p className="bio-text">
+            I am a seasoned professional with 20 years of experience delivering cutting-edge solutions in e-commerce, mobility, and industrial automation. My expertise spans AI, distributed systems (cloud-based and embedded), IoT, and automation tools.
+          </p>
+
+          <p className="bio-text">
+            I excel at applying research to real-world challenges and leading cross-functional teams with an entrepreneurial, collaborative approach. With a strong focus on AI, cloud, and IoT, I combine hands-on software development and leadership to drive impactful results.
+          </p>
+
+          <p className="bio-text">
+            Skilled in both technical and project management, I use agile methodologies to align teams with long-term goals. Outside of work, I enjoy traveling, photography, and reading.
+          </p>
+        </section>
+
+        <section className="academic-section">
+          <h2 className="section-title">Academic Supervision</h2>
+
+          <p className="bio-text">As an academic, I have supervised two PhD theses:</p>
+
+          <ul className="thesis-list">
+            <li>
+              <Link href="https://www.linkedin.com/in/owais-bhat-29140814b/" target="_blank" rel="noopener noreferrer" className="thesis-link">
+                Owais Bhat
+              </Link>
+              {" "}— &quot;Context-aware Deep Learning system for glycemic control in diabetic patients&quot;
+            </li>
+            <li>
+              <Link href="https://www.linkedin.com/in/zubair-khaliq-924836133/" target="_blank" rel="noopener noreferrer" className="thesis-link">
+                Zubair Khaliq
+              </Link>
+              {" "}— &quot;Development of Deep Learning based Intelligent Automation Framework for User Interface Testing&quot;
+            </li>
+          </ul>
+
+          <p className="bio-text">
+            In addition to these, I have supervised numerous masters and undergraduate theses and senior year projects.
+          </p>
+        </section>
+
+        <section className="skills-section">
+          <h2 className="section-title">Tools & Skills</h2>
+
+          <div className="skills-grid">
+            {skills.map(({ icon: Icon, name, color }) => (
+              <div key={name} className="skill-item">
+                <Icon className="skill-icon" style={{ color }} />
+                <span className="skill-name">{name}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      </main>
+
+      <Footer
+        bg_color="transparent"
+        normal_color="#a1a1aa"
+        icon_size="24px"
+        horizontal_margin="1vw"
+        horizontal_padding="5vw"
+        vertical_padding="2rem"
+        github={true}
+        linkedin={true}
+        need_copy_right={true}
+      />
+
+      <style jsx>{`
+        .about-page {
+          min-height: 100vh;
+          background: #0a0a0f;
+        }
+
+        .about-main {
+          max-width: 800px;
+          margin: 0 auto;
+          padding: 3rem 5vw 4rem;
+        }
+
+        .profile-section {
+          display: flex;
+          align-items: center;
+          gap: 2rem;
+          margin-bottom: 3rem;
+          padding-bottom: 2rem;
+          border-bottom: 1px solid rgba(0, 240, 255, 0.1);
+        }
+
+        .profile-image-container {
+          position: relative;
+          flex-shrink: 0;
+        }
+
+        .profile-image-container :global(.profile-image) {
+          border-radius: 50%;
+          border: 3px solid #00f0ff;
+          box-shadow: 0 0 30px rgba(0, 240, 255, 0.3);
+        }
+
+        .image-glow {
+          position: absolute;
+          inset: -10px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(0, 240, 255, 0.15) 0%, transparent 70%);
+          z-index: -1;
+          animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+          0%, 100% { opacity: 0.5; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.05); }
+        }
+
+        .profile-info {
+          flex: 1;
+        }
+
+        .profile-name {
+          font-family: 'Maven Pro', sans-serif;
+          font-size: clamp(1.75rem, 4vw, 2.25rem);
+          font-weight: 700;
+          color: #e4e4e7;
+          margin-bottom: 0.5rem;
+        }
+
+        .profile-title {
+          font-family: 'Share Tech Mono', monospace;
+          font-size: 1rem;
+          color: #00f0ff;
+          margin-bottom: 1rem;
+        }
+
+        .contact-info {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+
+        .contact-item {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-family: 'Source Sans Pro', sans-serif;
+          font-size: 0.95rem;
+          color: #a1a1aa;
+        }
+
+        .contact-item :global(.contact-icon) {
+          color: #39ff14;
+          font-size: 1.1rem;
+        }
+
+        .section-title {
+          font-family: 'Maven Pro', sans-serif;
+          font-size: 1.5rem;
+          font-weight: 600;
+          color: #00f0ff;
+          margin-bottom: 1.25rem;
+          padding-bottom: 0.5rem;
+          border-bottom: 2px solid rgba(0, 240, 255, 0.2);
+        }
+
+        .bio-section, .academic-section, .skills-section {
+          margin-bottom: 2.5rem;
+        }
+
+        .bio-text {
+          font-family: 'Source Sans Pro', sans-serif;
+          font-size: 1.05rem;
+          color: #a1a1aa;
+          line-height: 1.8;
+          margin-bottom: 1rem;
+        }
+
+        .thesis-list {
+          font-family: 'Source Sans Pro', sans-serif;
+          font-size: 1rem;
+          color: #a1a1aa;
+          margin: 1rem 0 1rem 1.5rem;
+          line-height: 1.8;
+        }
+
+        .thesis-list li {
+          margin-bottom: 0.75rem;
+        }
+
+        .thesis-list li::marker {
+          color: #39ff14;
+        }
+
+        .thesis-list :global(.thesis-link) {
+          color: #00f0ff;
+          text-decoration: none;
+          border-bottom: 1px dashed rgba(0, 240, 255, 0.4);
+          transition: all 0.2s ease;
+        }
+
+        .thesis-list :global(.thesis-link:hover) {
+          color: #39ff14;
+          border-bottom-color: #39ff14;
+        }
+
+        .skills-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+          gap: 1rem;
+        }
+
+        .skill-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
+          padding: 1rem;
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          border-radius: 8px;
+          transition: all 0.3s ease;
+        }
+
+        .skill-item:hover {
+          background: rgba(0, 240, 255, 0.05);
+          border-color: rgba(0, 240, 255, 0.2);
+          transform: translateY(-2px);
+        }
+
+        .skill-item :global(.skill-icon) {
+          font-size: 2rem;
+          transition: all 0.3s ease;
+        }
+
+        .skill-item:hover :global(.skill-icon) {
+          filter: drop-shadow(0 0 8px currentColor);
+        }
+
+        .skill-name {
+          font-family: 'Share Tech Mono', monospace;
+          font-size: 0.75rem;
+          color: #a1a1aa;
+          text-align: center;
+        }
+
+        @media screen and (max-width: 640px) {
+          .about-main {
+            padding: 2rem 4vw 3rem;
+          }
+
+          .profile-section {
+            flex-direction: column;
+            text-align: center;
+          }
+
+          .contact-info {
+            align-items: center;
+          }
+
+          .skills-grid {
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 0.75rem;
+          }
+
+          .skill-item {
+            padding: 0.75rem;
+          }
+
+          .skill-item :global(.skill-icon) {
+            font-size: 1.5rem;
+          }
+        }
+      `}</style>
     </div>
   );
 }

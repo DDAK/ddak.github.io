@@ -64,7 +64,7 @@ C++ offers several advantages for AI development on edge devices:
 ## Project setup for a dummy project 
 
 I will use a simple structure for this application. Here is the output of the tree command to get the folder structure (pre-build stage)
-``` text
+```plaintext
 |____APP
 	 |____application.cpp
 	 |____application.h
@@ -91,14 +91,14 @@ Setting *conanfile.txt*:
 
 To use Conan in your project, you need to create a *conanfile.txt* file in our project root directory. This file will contain information about your project's dependencies (open cv and dlib). Here's an example *conanfile.txt*:
 
-``` text
+```ini
 [requires]
 opencv/4.5.5
 [generators]
 cmake
 ```
 **Note**: I only have *opencv* as a dependency;  getting *dlib* to work with my *Mac M1 Pro* was problematic. I had to install dlib from source- check the instruction in *dlib* [repo](https://github.com/davisking/dlib). For other architecture types, you should be able to specify *dlib*  dependency in the *conanfile.txt*. Here is how I built and installed *dlib*.
-``` text
+```bash
 git clone git@github.com:davisking/dlib.git
 cd dlib
 mkdir build && cd build
@@ -113,7 +113,7 @@ setting *CMakeLists.txt*:
 
 To use the *cmake* build system in your project you need to create a *CMakeLists.txt* file in your project root directory. This file will contain information about your project's dependencies. Here's an example of *CMakeLists.txt*:
 
-``` text
+```cmake
 cmake_minimum_required(VERSION 2.8.12)
 project(APP)
 
@@ -129,7 +129,7 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
-find_package(dlib REQUIRED)  
+find_package(dlib REQUIRED)
 # Using the "cmake" generator
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
